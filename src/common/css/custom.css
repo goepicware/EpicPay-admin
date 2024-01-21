@@ -1,0 +1,151 @@
+.cust-ml-5 {
+    margin-left: 35px !important;
+}
+
+#layout-navbar {
+    z-index: 10;
+}
+
+.pro-filter-row .pro-filter-sbtbtn {
+    margin-top: -5px !important;
+}
+
+.pro-filter-row .pro-filter-refbtn {
+    margin-left: 35px !important;
+    margin-top: -5px !important;
+}
+
+.crm-setting-maindiv .accordion-button {
+    width: 82%;
+}
+
+.crm-setting-maindiv .accordion-button::after {
+    background-image: none;
+}
+
+.custm-select-box-cls {
+    width: 16%;
+    font-size: 12px;
+    float: right;
+    margin: -50px 10px 0px 0px;
+}
+
+.crm-setting-maindiv .accordion-button-act {
+    background-color: #F0F0F0;
+}
+
+.crm-setting-maindiv .accordion-header-act {
+    background-color: #F0F0F0;
+    border-bottom: 1px solid #EAEAEA;
+}
+
+.crm-setting-maindiv .accordion-button-inact {
+    background-color: #fbd8d8 !important;
+}
+
+.crm-setting-maindiv .accordion-header-inact {
+    background-color: #fbd8d8 !important;
+    border-bottom: 1px solid #f2abab !important;
+}
+
+.crm-setting-maindiv .accordion.accordion-header-primary .accordion-item.active .accordion-button {
+    color: #333333 !important;
+}
+
+.member_image_div {
+    margin: -8px 0px 0px 0px;
+}
+
+.member_image_div label{
+    margin-left: 5px;
+}
+
+.membership_birthday_promodiv {
+    margin: -4px 0px 0px 0px;
+}
+
+.membership_cashback_expirydays {
+    width: 87%;
+}
+
+.membership_cashback_expirydays_txt, .membership_dollar_to_points_txt {
+    float: right;
+    margin-top: -38px;
+    font-style: italic;
+    color: #919191;
+}
+
+.membership_dollar_to_points {
+    width: 45%;
+}
+
+.act-plusminus-maindiv .act-plus-icon .mdi::before, .act-plusminus-maindiv .act-minus-icon .mdi::before {
+    font-size: 30px !important;
+    line-height: 1.6;
+}
+
+.act-plusminus-maindiv .mdi-minus-circle-outline {
+    margin-right: 2px;
+}
+
+.act-plus-icon, .act-minus-icon {
+    cursor: pointer;
+}
+
+.mission_icon_div {
+    display: flex;
+}
+
+.mission_icon_div .form-floating {
+    width: 265px;
+}
+
+.mission_icon_div .form-floating input {
+    line-height: 35px;
+}
+
+.mission_icon_div .dz-image-preview {
+    width: 50px;
+    padding: 0px;
+    margin: 0px;
+    height: 60px;
+}
+
+.mission_icon_div .dz-details {
+    width: 50px;
+}
+
+.mission_icon_div .dz-thumbnail {
+    width: 50px;
+    padding: 0px;
+    margin: 0px;
+    height: 35px;
+}
+
+.mission_icon_div img {
+    width: 50px;
+    height: 35px;
+}
+
+.mission_icon_div .dz-remove {
+    padding: 2px 0px 0px 0px;
+}
+.mission_type {
+    padding-right: 0px;
+    width: 120px;
+}
+.mission_nooftransaction {
+    padding-left: 8px;
+    padding-right: 8px;
+    width: 120px;
+}
+.mission_bonus_points_maindiv {
+    margin: 0px;
+    padding: 0px;
+    width: 90px;
+}
+.mission_bonuspoints_validity_maindiv {
+    margin: 0px;
+    padding: 0px;
+    width: 90px;
+}
