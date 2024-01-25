@@ -90,6 +90,7 @@ import Ownriderform from "./components/Clientpanel/Ownrider/Form";
 import Pointslist from "./components/Clientpanel/Points/List";
 import Pointsform from "./components/Clientpanel/Points/Form";
 import Settingsform from "./components/Clientpanel/Settings/Form";
+import ReferralHistory from "./components/Clientpanel/ReferralHistory/List";
 
 import Refpage from "./components/Layout/Refpage";
 import Logout from "./components/Layout/Logout";
@@ -114,7 +115,11 @@ root.render(
           component={Clientform}
         />
         <Route exact path="/masterpanel/category" component={CmCategorylist} />
-        <Route exact path="/masterpanel/category/add" component={CmCategoryform} />
+        <Route
+          exact
+          path="/masterpanel/category/add"
+          component={CmCategoryform}
+        />
         <Route
           exact
           path="/masterpanel/category/edit/:categoryID"
@@ -125,7 +130,10 @@ root.render(
         {/*  Master Admin End*/}
 
         {/*  Client Panel Start*/}
-        <Route path={"/clientpanel/login/:LoginType/:clientID"} component={Clientlogin} />
+        <Route
+          path={"/clientpanel/login/:LoginType/:clientID"}
+          component={Clientlogin}
+        />
         <Route exact path="/clientpanel/login" component={Clientlogin} />
         <Route
           exact
@@ -273,6 +281,11 @@ root.render(
         />
         <Route
           exact
+          path="/clientpanel/referral/"
+          component={ReferralHistory}
+        />
+        <Route
+          exact
           path="/clientpanel/promotions/"
           component={Promotionlist}
         />
@@ -316,11 +329,7 @@ root.render(
           path="/clientpanel/rewardsettings/"
           component={Rewardsettingsform}
         />
-        <Route
-          exact
-          path="/clientpanel/mission/"
-          component={Missionform}
-        />
+        <Route exact path="/clientpanel/mission/" component={Missionform} />
         <Route
           exact
           path="/clientpanel/pointssettings/"
