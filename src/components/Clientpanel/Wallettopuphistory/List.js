@@ -1,23 +1,17 @@
 /* eslint-disable */
 import React, { Component } from "react";
-import { Link } from "react-router-dom";
 import { connect } from "react-redux";
 import cookie from "react-cookies";
 import axios from "axios";
-import Select from "react-select";
 import { apiUrl, adminlimit, clientheaderconfig } from "../../Helpers/Config";
 import { GET_LISTDATA } from "../../../actions";
-import {
-  showStatus,
-  encodeValue,
-  removeItem,
-} from "../../Helpers/SettingHelper";
+import { removeItem } from "../../Helpers/SettingHelper";
 import Header from "../Layout/Header";
 import Topmenu from "../Layout/Topmenu";
 import Footer from "../Layout/Footer";
 import Pagenation from "../Layout/Pagenation";
 var module = "clientpanel/wallettopupplan/";
-var moduleName = "Wallet Topup History";
+var moduleName = "Credit History";
 class List extends Component {
   constructor(props) {
     super(props);
@@ -33,13 +27,11 @@ class List extends Component {
       name: "",
       status: "",
       storeID: "",
-      outletList: [],
     };
     this.handleChangeText = this.handleChangeText.bind(this);
   }
   componentDidMount() {
     this.loadList(1);
-    this.loadOutlet();
   }
   UNSAFE_componentWillReceiveProps(nextProps) {
     if (nextProps.listdata !== this.state.listdata) {
@@ -50,21 +42,6 @@ class List extends Component {
         totalPage: nextProps.totalPages,
       });
     }
-  }
-  loadOutlet() {
-    var urlShringTxt =
-      apiUrl +
-      "clientpanel/outlets/dropdownlist?company_id=" +
-      this.state.companyID;
-    axios.get(urlShringTxt, clientheaderconfig).then((res) => {
-      if (res.data.status === "ok") {
-        var result = [{ label: "All Outlet", value: "alloutlet" }];
-        res.data.result.map((item) => {
-          result.push(item);
-        });
-        this.setState({ outletList: result });
-      }
-    });
   }
   sateValChange = (field, value) => {
     if (field === "page") {
@@ -158,8 +135,7 @@ class List extends Component {
                   <div className="col-lg-10 col-md-6">
                     <h4 className="fw-bold">{moduleName}</h4>
                   </div>
-                  <div className="col-lg-2 col-md-6 text-end">
-                  </div>
+                  <div className="col-lg-2 col-md-6 text-end"></div>
                 </div>
                 <div className="row mb-4">
                   <div className="col-md-3">
@@ -174,35 +150,6 @@ class List extends Component {
                       <label htmlFor="name">Topup Plan Title</label>
                     </div>
                   </div>
-
-                  {/*<div className="col-md-3">
-                    <div className="form-floating form-floating-outline custm-select-box filter-select mb-4">
-                      <Select
-                        value={this.state.storeID}
-                        onChange={this.handleSelectChange.bind(this, "storeID")}
-                        placeholder="Select Outlet"
-                        isClearable={true}
-                        options={this.state.outletList}
-                      />
-                      <label className="select-box-label">Outlet</label>
-                    </div>
-                  </div>*/}
-
-                  {/*<div className="col-md-3">
-                    <div className="form-floating form-floating-outline custm-select-box filter-select mb-4">
-                      <Select
-                        value={this.state.status}
-                        onChange={this.handleSelectChange.bind(this, "status")}
-                        placeholder="Select Status"
-                        isClearable={true}
-                        options={[
-                          { value: "A", label: "Active" },
-                          { value: "I", label: "In Active" },
-                        ]}
-                      />
-                      <label className="select-box-label">Status</label>
-                    </div>
-                  </div>*/}
                   <div className="col-md-1 mt-2">
                     <button
                       type="button"
@@ -229,7 +176,6 @@ class List extends Component {
                       <thead>
                         <tr>
                           <th>Plan Title</th>
-                          {/*<th>Outlet</th>*/}
                           <th>Credits</th>
                           <th>Amount</th>
                           <th>Topup Date</th>
@@ -257,9 +203,15 @@ class List extends Component {
                             return (
                               <tr key={index}>
                                 <td>
-                                  <strong>{item.wallettopup_display_name}</strong>
+                                  <strong>
+                                    {item.wallettopup_display_name}
+                                  </strong>
                                 </td>
-                                <td>({item.wallettopup_credits_amount} + {item.wallettopup_bonus_amount}) {item.wallettopup_total_credits}</td>
+                                <td>
+                                  ({item.wallettopup_credits_amount} +{" "}
+                                  {item.wallettopup_bonus_amount}){" "}
+                                  {item.wallettopup_total_credits}
+                                </td>
                                 <td>${item.wallettopup_total_amount}</td>
                                 <td>{item.wallettopup_created_on}</td>
                                 <td>{item.wallettopup_customer_name}</td>

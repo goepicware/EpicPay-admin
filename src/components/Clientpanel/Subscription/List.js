@@ -17,7 +17,7 @@ import Topmenu from "../Layout/Topmenu";
 import Footer from "../Layout/Footer";
 import Pagenation from "../Layout/Pagenation";
 var module = "clientpanel/paintbasedproducts/";
-var moduleName = "Products";
+var moduleName = "Subscriptions";
 class List extends Component {
   constructor(props) {
     super(props);
@@ -33,7 +33,6 @@ class List extends Component {
       name: "",
       status: "",
       storeID: "",
-      producttype: "",
       outletList: [],
     };
     this.handleChangeText = this.handleChangeText.bind(this);
@@ -107,12 +106,8 @@ class List extends Component {
     ) {
       addParams += "&storeID=" + this.state.storeID.value;
     }
-    if (
-      this.state.producttype !== null &&
-      Object.keys(this.state.producttype).length > 0
-    ) {
-      addParams += "&producttype=" + this.state.producttype.value;
-    }
+
+    addParams += "&producttype=6";
     if (
       this.state.status !== null &&
       Object.keys(this.state.status).length > 0
@@ -140,7 +135,6 @@ class List extends Component {
         loading: true,
         name: "",
         storeID: "",
-        producttype: "",
         status: "",
       },
       function () {
@@ -153,7 +147,7 @@ class List extends Component {
     return (
       <div className="layout-wrapper layout-content-navbar">
         <div className="layout-container">
-          <Header {...this.props} currentPage={"catalog-products"} />
+          <Header {...this.props} currentPage={"subscription"} />
           <div className="layout-page">
             <Topmenu />
 
@@ -184,7 +178,7 @@ class List extends Component {
                         onChange={this.handleChangeText}
                         value={this.state.name}
                       />
-                      <label htmlFor="name">Product Name</label>
+                      <label htmlFor="name">Subscription Name</label>
                     </div>
                   </div>
 
@@ -200,26 +194,6 @@ class List extends Component {
                       <label className="select-box-label">Outlet</label>
                     </div>
                   </div>
-
-                  <div className="col-md-3 pro-filter-search">
-                    <div className="form-floating form-floating-outline custm-select-box filter-select mb-4">
-                      <Select
-                        value={this.state.producttype}
-                        onChange={this.handleSelectChange.bind(
-                          this,
-                          "producttype"
-                        )}
-                        placeholder="Select Type"
-                        isClearable={true}
-                        options={[
-                          { value: "1", label: "Simple" },
-                          { value: "5", label: "Voucher" },
-                        ]}
-                      />
-                      <label className="select-box-label">Product Type</label>
-                    </div>
-                  </div>
-
                   <div className="col-md-3 pro-filter-search">
                     <div className="form-floating form-floating-outline custm-select-box filter-select mb-4">
                       <Select
@@ -261,10 +235,9 @@ class List extends Component {
                     <table className="table">
                       <thead>
                         <tr>
-                          <th>Product Name</th>
+                          <th>Subscription Name</th>
                           <th>Alias Name</th>
                           <th>Outlet Name</th>
-                          <th>Type Of Product</th>
                           <th>SKU</th>
                           <th>Price</th>
                           <th>Status</th>
@@ -294,7 +267,6 @@ class List extends Component {
                                 </td>
                                 <td>{item.product_alias}</td>
                                 <td>{item.outlet_name}</td>
-                                <td>{item.product_type_name}</td>
                                 <td>{item.product_sku}</td>
                                 <td>{item.product_price}</td>
                                 <td>{showStatus(item.product_status)}</td>

@@ -2,42 +2,40 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
 import { connect } from "react-redux";
-
-import { apiUrl, adminlimit } from "../../Helpers/Config";
+import cookie from "react-cookies";
+import { apiUrl, adminlimit, defaultUniqueID } from "../../Helpers/Config";
 import { GET_LISTDATA } from "../../../actions";
-import {
-  showStatus,
-  encodeValue,
-  removeItem,
-} from "../../Helpers/SettingHelper";
+import { encodeValue, removeItem } from "../../Helpers/SettingHelper";
 import Header from "../Layout/Header";
 import Topmenu from "../Layout/Topmenu";
 import Footer from "../Layout/Footer";
 import Pagenation from "../Layout/Pagenation";
-
+var module = "clientpanel/emailtemplate/";
+var moduleName = "Email Template";
 class List extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      path: this.props.match.path,
       totalRecords: 0,
       totalPage: 0,
       currentPage: 1,
-      clientList: [],
+      listdata: [],
       loading: true,
     };
   }
   componentDidMount() {
     var params = {
       params: "limit=" + adminlimit + "&offset=1",
-      url: apiUrl + "company/companycontroller/company_list",
-      type: "master",
+      url: apiUrl + module + "list",
+      authType: "",
     };
     this.props.getListData(params);
   }
   UNSAFE_componentWillReceiveProps(nextProps) {
-    if (nextProps.clientyList !== this.state.clientyList) {
+    if (nextProps.listdata !== this.state.listdata) {
       this.setState({
-        clientList: nextProps.clientyList,
+        listdata: nextProps.listdata,
         loading: false,
         totalRecords: nextProps.totalRecords,
         totalPage: nextProps.totalPages,
@@ -54,24 +52,25 @@ class List extends Component {
         function () {
           var params = {
             params: "limit=" + adminlimit + "&offset=" + value,
-            url: apiUrl + "company/companycontroller/company_list",
-            type: "master",
+            url: apiUrl + module + "list",
+            type: "",
           };
           this.props.getListData(params);
         }
       );
     }
   };
-
-  removeItem(CompnayId) {
-    removeItem(CompnayId);
+  removeItem(deleteID) {
+    var params = { delete_id: deleteID, company_id: defaultUniqueID };
+    var delurl = module + "delete";
+    removeItem(params, delurl, "");
   }
 
   render() {
     return (
       <div className="layout-wrapper layout-content-navbar">
         <div className="layout-container">
-          <Header {...this.props} currentPage={"client"} />
+          <Header {...this.props} currentPage={"emailtemplate"} />
           <div className="layout-page">
             <Topmenu />
 
@@ -79,10 +78,10 @@ class List extends Component {
               <div className="container-xxl flex-grow-1 container-p-y">
                 <div className="row mb-3">
                   <div className="col-lg-10 col-md-6">
-                    <h4 className="fw-bold">Company</h4>
+                    <h4 className="fw-bold">{moduleName}</h4>
                   </div>
                   <div className="col-lg-2 col-md-6 text-end">
-                    <Link to={"/masterpanel/client/add"}>
+                    <Link to={this.state.path + "add"}>
                       <button
                         type="button"
                         className="btn btn-outline-primary waves-effect"
@@ -98,19 +97,16 @@ class List extends Component {
                     <table className="table">
                       <thead>
                         <tr>
-                          <th>Client Name</th>
-                          {/*<th>Contact Person Name</th>*/}
-                          <th>User Name</th>
-                          <th>Email</th>
-                          <th>Type Of Merchants</th>
-                          <th>Status</th>
+                          <th>Template ID</th>
+                          <th>Subject</th>
+                          <th>Email Config</th>
                           <th>Actions</th>
                         </tr>
                       </thead>
                       <tbody>
                         {this.state.loading === true ? (
                           <tr>
-                            <td colSpan={7} align="center">
+                            <td colSpan={3} align="center">
                               <div
                                 className="spinner-border spinner-border-lg text-primary"
                                 role="status"
@@ -121,32 +117,15 @@ class List extends Component {
                               </div>
                             </td>
                           </tr>
-                        ) : (
-                          this.state.clientList.length > 0 &&
-                          this.state.clientList.map((item, index) => {
+                        ) : this.state.listdata.length > 0 ? (
+                          this.state.listdata.map((item, index) => {
                             return (
                               <tr key={index}>
                                 <td>
-                                  <strong>{item.company_name}</strong>
+                                  <strong>{item.email_id}</strong>
                                 </td>
-                                {/*<td>{item.company_owner_name}</td>*/}
-                                <td>{item.company_username}</td>
-                                <td>
-                                  <a
-                                    href={
-                                      "mailto:" + item.company_email_address
-                                    }
-                                  >
-                                    {item.company_email_address}
-                                  </a>
-                                </td>
-                                <td>
-                                  {item.company_merchants_type === "1" &&
-                                    "Complete"}
-                                  {item.company_merchants_type === "2" &&
-                                    "Voucher Only"}
-                                </td>
-                                <td>{showStatus(item.company_status)}</td>
+                                <td>{item.email_subject}</td>
+                                <td>{item.email_config_key}</td>
                                 <td>
                                   <div className="dropdown">
                                     <button
@@ -159,8 +138,9 @@ class List extends Component {
                                     <div className="dropdown-menu">
                                       <Link
                                         to={
-                                          "/masterpanel/client/edit/" +
-                                          encodeValue(item.company_id)
+                                          this.state.path +
+                                          "edit/" +
+                                          encodeValue(item.email_id)
                                         }
                                         className="dropdown-item"
                                       >
@@ -172,22 +152,11 @@ class List extends Component {
                                         href={void 0}
                                         onClick={this.removeItem.bind(
                                           this,
-                                          encodeValue(item.company_id)
+                                          encodeValue(item.email_id)
                                         )}
                                       >
                                         <i className="mdi mdi-trash-can-outline me-1"></i>
                                         Delete
-                                      </a>
-                                      <a
-                                        className="dropdown-item"
-                                        href={
-                                          "/clientpanel/login/masteradmin/" +
-                                          item.company_unquie_id
-                                        }
-                                        target="_blank"
-                                      >
-                                        <i className="mdi mdi-arrow-right-bold"></i>
-                                        Client Panel
                                       </a>
                                     </div>
                                   </div>
@@ -195,6 +164,12 @@ class List extends Component {
                               </tr>
                             );
                           })
+                        ) : (
+                          <tr>
+                            <td className="text-center" colSpan={3}>
+                              No {moduleName} Found
+                            </td>
+                          </tr>
                         )}
                       </tbody>
                     </table>
@@ -224,20 +199,20 @@ class List extends Component {
 }
 
 const mapStateTopProps = (state) => {
-  var clientList = Array();
-  var clientListStatus = "";
+  var listdata = Array();
+  var listdataStatus = "";
   var totalPages = 0;
   var totalRecords = 0;
   if (Object.keys(state.listdata).length > 0) {
-    clientListStatus = state.listdata[0].status;
+    listdataStatus = state.listdata[0].status;
     if (state.listdata[0].status === "ok") {
-      clientList = state.listdata[0].result;
+      listdata = state.listdata[0].result;
       totalPages = state.listdata[0].totalPages;
       totalRecords = state.listdata[0].totalRecords;
     }
   }
   return {
-    clientyList: clientList,
+    listdata: listdata,
     totalPages: totalPages,
     totalRecords: totalRecords,
   };

@@ -1,36 +1,7 @@
 /* eslint-disable */
 import React, { Component } from "react";
-import cookie from "react-cookies";
-import axios from "axios";
 import { connect } from "react-redux";
-import update from "immutability-helper";
-
-import {
-  appId,
-  apiUrl,
-  deliveryId,
-  pickupId,
-  cateringId,
-  reservationId,
-} from "../../Helpers/Config";
-import {
-  GET_GLOBAL_SETTINGS,
-  GET_STATIC_BLOCK,
-  GET_NORMAL_POPUP,
-  GET_CATEGORY_LIST,
-  GET_MENU_NAVIGATION,
-} from "../../../actions";
-import {
-  showLoader,
-  hideLoader,
-  validateEmailFun,
-  showCustomAlert,
-} from "../../Helpers/SettingHelper";
-
 import Header from "../Layout/Header";
-
-var Parser = require("html-react-parser");
-
 class Home extends Component {
   constructor(props) {
     super(props);
@@ -352,45 +323,10 @@ class Home extends Component {
               <footer className="content-footer footer bg-footer-theme">
                 <div className="container-xxl">
                   <div className="footer-container d-flex align-items-center justify-content-between py-3 flex-md-row flex-column">
-                    <div className="mb-2 mb-md-0">
-                      ©
-                      <script>document.write(new Date().getFullYear());</script>
-                      , made with <span className="text-danger">❤️</span> by
-                      <a
-                        href="https://pixinvent.com"
-                        target="_blank"
-                        className="footer-link fw-medium"
-                      >
-                        Pixinvent
-                      </a>
-                    </div>
+                    <div className="mb-2 mb-md-0">© Epicpay</div>
                     <div>
                       <a
-                        href="https://themeforest.net/licenses/standard"
-                        className="footer-link me-4"
-                        target="_blank"
-                      >
-                        License
-                      </a>
-                      <a
-                        href="https://1.envato.market/pixinvent_portfolio"
-                        target="_blank"
-                        className="footer-link me-4"
-                      >
-                        More Themes
-                      </a>
-
-                      <a
-                        href="https://demos.pixinvent.com/materialize-html-admin-template/documentation/"
-                        target="_blank"
-                        className="footer-link me-4"
-                      >
-                        Documentation
-                      </a>
-
-                      <a
-                        href="https://pixinvent.ticksy.com/"
-                        target="_blank"
+                        href={void 0}
                         className="footer-link d-none d-sm-inline-block"
                       >
                         Support

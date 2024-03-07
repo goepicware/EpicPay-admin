@@ -3,27 +3,24 @@ import React, { Component } from "react";
 import { Link } from "react-router-dom";
 import { connect } from "react-redux";
 import cookie from "react-cookies";
-import axios from "axios";
 import Select from "react-select";
-import { apiUrl, adminlimit, clientheaderconfig } from "../../Helpers/Config";
+import { apiUrl, adminlimit, defaultUniqueID } from "../../Helpers/Config";
 import { GET_LISTDATA } from "../../../actions";
 import {
   showStatus,
   encodeValue,
   removeItem,
 } from "../../Helpers/SettingHelper";
-import Header from "../Layout/Header";
-import Topmenu from "../Layout/Topmenu";
-import Footer from "../Layout/Footer";
+import Header from "..//Layout/Header";
+import Topmenu from "..//Layout/Topmenu";
+import Footer from "..//Layout/Footer";
 import Pagenation from "../Layout/Pagenation";
-var module = "clientpanel/paintbasedproducts/";
-var moduleName = "Products";
+var module = "clientpanel/staticblocks/";
+var moduleName = "Static Block";
 class List extends Component {
   constructor(props) {
     super(props);
-    var companyID = cookie.load("companyID");
     this.state = {
-      companyID: companyID,
       path: this.props.match.path,
       totalRecords: 0,
       totalPage: 0,
@@ -32,15 +29,11 @@ class List extends Component {
       loading: true,
       name: "",
       status: "",
-      storeID: "",
-      producttype: "",
-      outletList: [],
     };
     this.handleChangeText = this.handleChangeText.bind(this);
   }
   componentDidMount() {
     this.loadList(1);
-    this.loadOutlet();
   }
   UNSAFE_componentWillReceiveProps(nextProps) {
     if (nextProps.listdata !== this.state.listdata) {
@@ -52,18 +45,6 @@ class List extends Component {
       });
     }
   }
-  loadOutlet() {
-    var urlShringTxt =
-      apiUrl +
-      "clientpanel/outlets/dropdownlist?company_id=" +
-      this.state.companyID;
-    axios.get(urlShringTxt, clientheaderconfig).then((res) => {
-      if (res.data.status === "ok") {
-        this.setState({ outletList: res.data.result });
-      }
-    });
-  }
-
   sateValChange = (field, value) => {
     if (field === "page") {
       this.setState(
@@ -78,9 +59,9 @@ class List extends Component {
     }
   };
   removeItem(deleteID) {
-    var params = { delete_id: deleteID, company_id: this.state.companyID };
+    var params = { delete_id: deleteID, uniqueID: defaultUniqueID };
     var delurl = module + "delete";
-    removeItem(params, delurl, "client");
+    removeItem(params, delurl);
   }
   handleChangeText(event) {
     var name = event.target.name;
@@ -88,7 +69,7 @@ class List extends Component {
     this.setState({ [name]: value });
   }
   handleSelectChange(name, value) {
-    this.setState({ [name]: value }, function () {});
+    this.setState({ [name]: value });
   }
 
   searchList() {
@@ -102,18 +83,6 @@ class List extends Component {
       addParams += "&name=" + this.state.name;
     }
     if (
-      this.state.storeID !== null &&
-      Object.keys(this.state.storeID).length > 0
-    ) {
-      addParams += "&storeID=" + this.state.storeID.value;
-    }
-    if (
-      this.state.producttype !== null &&
-      Object.keys(this.state.producttype).length > 0
-    ) {
-      addParams += "&producttype=" + this.state.producttype.value;
-    }
-    if (
       this.state.status !== null &&
       Object.keys(this.state.status).length > 0
     ) {
@@ -121,16 +90,9 @@ class List extends Component {
     }
 
     var params = {
-      params:
-        "limit=" +
-        adminlimit +
-        "&offset=" +
-        offset +
-        "&company_id=" +
-        this.state.companyID +
-        addParams,
+      params: "limit=" + adminlimit + "&offset=" + offset + addParams,
       url: apiUrl + module + "list",
-      authType: "client",
+      authType: "",
     };
     this.props.getListData(params);
   }
@@ -139,8 +101,6 @@ class List extends Component {
       {
         loading: true,
         name: "",
-        storeID: "",
-        producttype: "",
         status: "",
       },
       function () {
@@ -153,7 +113,7 @@ class List extends Component {
     return (
       <div className="layout-wrapper layout-content-navbar">
         <div className="layout-container">
-          <Header {...this.props} currentPage={"catalog-products"} />
+          <Header {...this.props} currentPage={"staticblock"} />
           <div className="layout-page">
             <Topmenu />
 
@@ -174,8 +134,8 @@ class List extends Component {
                     </Link>
                   </div>
                 </div>
-                <div className="row mb-4 pro-filter-row">
-                  <div className="col-md-3 pro-filter-text">
+                <div className="row mb-4">
+                  <div className="col-md-3">
                     <div className="form-floating form-floating-outline mb-4">
                       <input
                         type="text"
@@ -184,44 +144,11 @@ class List extends Component {
                         onChange={this.handleChangeText}
                         value={this.state.name}
                       />
-                      <label htmlFor="name">Product Name</label>
+                      <label htmlFor="name">Title</label>
                     </div>
                   </div>
-
-                  <div className="col-md-3 pro-filter-outlet">
-                    <div className="form-floating form-floating-outline custm-select-box filter-select mb-4">
-                      <Select
-                        value={this.state.storeID}
-                        onChange={this.handleSelectChange.bind(this, "storeID")}
-                        placeholder="Select Outlet"
-                        isClearable={true}
-                        options={this.state.outletList}
-                      />
-                      <label className="select-box-label">Outlet</label>
-                    </div>
-                  </div>
-
-                  <div className="col-md-3 pro-filter-search">
-                    <div className="form-floating form-floating-outline custm-select-box filter-select mb-4">
-                      <Select
-                        value={this.state.producttype}
-                        onChange={this.handleSelectChange.bind(
-                          this,
-                          "producttype"
-                        )}
-                        placeholder="Select Type"
-                        isClearable={true}
-                        options={[
-                          { value: "1", label: "Simple" },
-                          { value: "5", label: "Voucher" },
-                        ]}
-                      />
-                      <label className="select-box-label">Product Type</label>
-                    </div>
-                  </div>
-
-                  <div className="col-md-3 pro-filter-search">
-                    <div className="form-floating form-floating-outline custm-select-box filter-select mb-4">
+                  <div className="col-md-3">
+                    <div className="form-floating form-floating-outline custm-select-box filter-select">
                       <Select
                         value={this.state.status}
                         onChange={this.handleSelectChange.bind(this, "status")}
@@ -235,8 +162,7 @@ class List extends Component {
                       <label className="select-box-label">Status</label>
                     </div>
                   </div>
-
-                  <div className="col-md-1 mt-2 pro-filter-sbtbtn">
+                  <div className="col-md-3 mt-2">
                     <button
                       type="button"
                       className="btn btn-primary me-sm-3 me-1 waves-effect waves-light"
@@ -244,9 +170,6 @@ class List extends Component {
                     >
                       Search
                     </button>
-                  </div>
-
-                  <div className="col-md-1 mt-2 pro-filter-refbtn">
                     <button
                       type="reset"
                       className="btn btn-label-secondary waves-effect"
@@ -256,17 +179,14 @@ class List extends Component {
                     </button>
                   </div>
                 </div>
+
                 <div className="card">
                   <div className="table-responsive text-nowrap p-1 mt-4">
                     <table className="table">
                       <thead>
                         <tr>
-                          <th>Product Name</th>
-                          <th>Alias Name</th>
-                          <th>Outlet Name</th>
-                          <th>Type Of Product</th>
-                          <th>SKU</th>
-                          <th>Price</th>
+                          <th>Title</th>
+                          <th>Slug</th>
                           <th>Status</th>
                           <th>Actions</th>
                         </tr>
@@ -274,7 +194,7 @@ class List extends Component {
                       <tbody>
                         {this.state.loading === true ? (
                           <tr>
-                            <td colSpan={7} align="center">
+                            <td colSpan={4} align="center">
                               <div
                                 className="spinner-border spinner-border-lg text-primary"
                                 role="status"
@@ -290,14 +210,10 @@ class List extends Component {
                             return (
                               <tr key={index}>
                                 <td>
-                                  <strong>{item.product_name}</strong>
+                                  <strong>{item.staticblocks_title}</strong>
                                 </td>
-                                <td>{item.product_alias}</td>
-                                <td>{item.outlet_name}</td>
-                                <td>{item.product_type_name}</td>
-                                <td>{item.product_sku}</td>
-                                <td>{item.product_price}</td>
-                                <td>{showStatus(item.product_status)}</td>
+                                <td>{item.staticblocks_slug}</td>
+                                <td>{showStatus(item.staticblocks_status)}</td>
                                 <td>
                                   <div className="dropdown">
                                     <button
@@ -312,7 +228,7 @@ class List extends Component {
                                         to={
                                           this.state.path +
                                           "edit/" +
-                                          encodeValue(item.product_primary_id)
+                                          encodeValue(item.staticblocks_id)
                                         }
                                         className="dropdown-item"
                                       >
@@ -324,7 +240,7 @@ class List extends Component {
                                         href={void 0}
                                         onClick={this.removeItem.bind(
                                           this,
-                                          encodeValue(item.product_primary_id)
+                                          encodeValue(item.staticblocks_id)
                                         )}
                                       >
                                         <i className="mdi mdi-trash-can-outline me-1"></i>
@@ -339,7 +255,7 @@ class List extends Component {
                         ) : (
                           <tr>
                             <td className="text-center" colSpan={8}>
-                              No Outlet Found
+                              No {moduleName} Found
                             </td>
                           </tr>
                         )}

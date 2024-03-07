@@ -36,7 +36,7 @@ import AWS from "aws-sdk";
 AWS.config.update(awsCredentials);
 const s3 = new AWS.S3();
 var module = "clientpanel/wallettopupplan/";
-var moduleName = "Plans";
+var moduleName = "Credit Setup";
 var modulePath = "/clientpanel/wallettopupplan";
 class Form extends Component {
   constructor(props) {
@@ -162,17 +162,19 @@ class Form extends Component {
       });
     }
   }
-  
+
   loadOutlet() {
     var urlShringTxt =
       apiUrl + "clientpanel/outlets/dropdownlist?company_id=" + CompanyID();
     axios.get(urlShringTxt, clientheaderconfig).then((res) => {
       if (res.data.status === "ok") {
-        this.setState({ outletList: res.data.result });
+        var outlets = [{ label: "All Outlet", value: "" }];
+        outlets = outlets.concat(res.data.result);
+        this.setState({ outletList: outlets });
       }
     });
   }
-  
+
   sateValChange = (field, value) => {};
 
   handleChange(checked, name) {
@@ -189,7 +191,7 @@ class Form extends Component {
   handleSubmit = () => {
     showLoader("submit_frm", "class");
     var postData = this.state.postdata;
-    
+
     var postObject = {
       outlets:
         Object.keys(postData.outlets).length > 0 ? postData.outlets.value : "",
@@ -381,7 +383,9 @@ class PostForm extends Component {
       errMsgStatus = "";
     if ($validation.plan_display_name.error.reason !== undefined) {
       errMsgPromoCode = $validation.plan_display_name.show && (
-        <span className="error">{$validation.plan_display_name.error.reason}</span>
+        <span className="error">
+          {$validation.plan_display_name.error.reason}
+        </span>
       );
     }
     if ($validation.start_date.error.reason !== undefined) {
@@ -434,7 +438,7 @@ class PostForm extends Component {
                 )}
               />
               <label htmlFor="plan_display_name">
-              Top Up Plan Title<span className="error">*</span>
+                Top Up Plan Title<span className="error">*</span>
               </label>
               {errMsgPromoCode}
             </div>
@@ -456,7 +460,7 @@ class PostForm extends Component {
             </div>
           </div>
           <div className="col-md-6">
-           <div className="form-floating form-floating-outline mb-4">
+            <div className="form-floating form-floating-outline mb-4">
               <input
                 type="text"
                 className="form-control"

@@ -109,7 +109,7 @@
   text-align: center;
   margin-top: 1.25rem;
 }
-.app-brand-logo img { width: 40px; }
+.app-brand-logo img { width: 150px; }
 .react-datepicker__input-container .form-control { height: 50px;}
 .react-datepicker-wrapper {width: 100%; }
 .react-datepicker-popper {z-index: 11 !important }

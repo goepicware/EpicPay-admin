@@ -1,12 +1,9 @@
 /* eslint-disable */
 import React, { Component } from "react";
-import cookie from "react-cookies";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { connect } from "react-redux";
 import Select from "react-select";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
 import update from "immutability-helper";
 import { validated } from "react-custom-validation";
 import validator from "validator";
@@ -91,11 +88,19 @@ class Form extends Component {
         maintenance_mode_description: "",
         assign_availability: [],
         action: "add",
-        company_stripe_mode: '',
-        company_stripe_secret_test: '',
-        company_stripe_secret_live: '',
-        company_stripe_public_test: '',
-        company_stripe_public_live: '',
+        company_stripe_mode: "",
+        company_stripe_secret_test: "",
+        company_stripe_secret_live: "",
+        company_stripe_public_test: "",
+        company_stripe_public_live: "",
+        subscription: {
+          weekly: { amount: "", infotext: "" },
+          monthly: { amount: "", infotext: "" },
+          quarterly: { amount: "", infotext: "" },
+          biannually: { amount: "", infotext: "" },
+          annually: { amount: "", infotext: "" },
+        },
+        enable_subscription: false,
       },
       loading: true,
       tatList: [],
@@ -153,9 +158,9 @@ class Form extends Component {
           var company_stripe_mode =
             typeof result.company_stripe_mode !== undefined &&
             typeof result.company_stripe_mode !== "undefined" &&
-            result.company_stripe_mode !== "" 
+            result.company_stripe_mode !== ""
               ? {
-                  label: result.company_stripe_mode == 1 ? 'Live': 'Test',
+                  label: result.company_stripe_mode == 1 ? "Live" : "Test",
                   value: result.company_stripe_mode,
                 }
               : "";
@@ -233,25 +238,25 @@ class Form extends Component {
             company_stripe_mode: company_stripe_mode,
             company_stripe_public_live:
               typeof result.company_stripe_public_live !== undefined &&
-              typeof result.company_stripe_public_live !== "undefined" && 
+              typeof result.company_stripe_public_live !== "undefined" &&
               result.company_stripe_public_live !== ""
                 ? result.company_stripe_public_live
                 : "",
             company_stripe_public_test:
               typeof result.company_stripe_public_test !== undefined &&
-              typeof result.company_stripe_public_test !== "undefined" && 
+              typeof result.company_stripe_public_test !== "undefined" &&
               result.company_stripe_public_test !== ""
                 ? result.company_stripe_public_test
                 : "",
             company_stripe_secret_live:
               typeof result.company_stripe_secret_live !== undefined &&
-              typeof result.company_stripe_secret_live !== "undefined" && 
+              typeof result.company_stripe_secret_live !== "undefined" &&
               result.company_stripe_secret_live !== ""
                 ? result.company_stripe_secret_live
                 : "",
             company_stripe_secret_test:
               typeof result.company_stripe_secret_test !== undefined &&
-              typeof result.company_stripe_secret_test !== "undefined" && 
+              typeof result.company_stripe_secret_test !== "undefined" &&
               result.company_stripe_secret_test !== ""
                 ? result.company_stripe_secret_test
                 : "",
@@ -379,13 +384,23 @@ class Form extends Component {
                 ? result.enable_maintenance_mode
                 : "",
             maintenance_mode_description:
-              result.maintenance_mode_description !== "" &&
-              typeof result.maintenance_mode_description !== undefined &&
-              typeof result.maintenance_mode_description !== "undefined" &&
-              result.maintenance_mode_description !== null
+              result?.maintenance_mode_description !== "" &&
+              result?.maintenance_mode_description !== null
                 ? result.maintenance_mode_description
                 : "",
             assign_availability: [],
+            subscription:
+              result.product_subscription !== "" &&
+              result.product_subscription !== null
+                ? JSON.parse(result.store_subscription)
+                : {
+                    weekly: { amount: "", infotext: "" },
+                    monthly: { amount: "", infotext: "" },
+                    quarterly: { amount: "", infotext: "" },
+                    biannually: { amount: "", infotext: "" },
+                    annually: { amount: "", infotext: "" },
+                  },
+            enable_subscription: result?.enable_subscription,
             action: "edit",
           };
           this.setState({ clientdata: clientupdatedata, pageloading: false });
@@ -468,7 +483,7 @@ class Form extends Component {
       company_stripe_mode:
         Object.keys(postData.company_stripe_mode).length > 0
           ? postData.company_stripe_mode.value
-          : '',
+          : "",
       company_stripe_secret_test: postData.company_stripe_secret_test,
       company_stripe_secret_live: postData.company_stripe_secret_live,
       company_stripe_public_test: postData.company_stripe_public_test,
@@ -511,6 +526,7 @@ class Form extends Component {
       enable_maintenance_mode: postData.enable_maintenance_mode,
       maintenance_mode_description: postData.maintenance_mode_description,
       assign_availability: assign_availability,
+      subscription: JSON.stringify(postData.subscription),
       loginID: userID(),
       company_admin_id: clientID(),
       company_id: CompanyID(),
@@ -630,7 +646,7 @@ function validationConfig(props) {
     company_stripe_secret_live,
     company_stripe_public_test,
     company_stripe_public_live,
-    company_stripe_mode
+    company_stripe_mode,
   } = props.fields;
 
   return {
@@ -706,7 +722,6 @@ class PostForm extends Component {
     this.props.onChange(name, value);
   }
   handleChangeCheck(name, event) {
-    console.log(event.target, "event.target");
     var value = event.target.checked === true ? "Yes" : "No";
     if (name === "assign_availability") {
       var assign_availability = this.props.fields.assign_availability;
@@ -801,6 +816,20 @@ class PostForm extends Component {
     }
     this.props.onChange("social_media", updSocialMedia);
   }
+
+  handleChangeSubscription(types, name, event) {
+    var subscription = this.props.fields.subscription;
+    var nameDetails = types.toLowerCase();
+    if (name === "amount") {
+      var validNumber = new RegExp(/^\d*\.?\d*$/);
+      if (!validNumber.test(event.target.value)) {
+        return false;
+      }
+    }
+    subscription[nameDetails][name] = event.target.value;
+    this.props.onChange(subscription, subscription);
+  }
+
   render() {
     const { fields, onChange, onValid, onInvalid, $field, $validation } =
       this.props;
@@ -955,6 +984,14 @@ class PostForm extends Component {
       );
     }
 
+    var subscriptionTypes = [
+      "Weekly",
+      "Monthly",
+      "Quarterly",
+      "Biannually",
+      "Annually",
+    ];
+
     return (
       <form className="card fv-plugins-bootstrap5" id="modulefrm">
         <div className="row g-3">
@@ -1027,7 +1064,7 @@ class PostForm extends Component {
                         {errMsgUrl}
                       </div>
                     </div>
-                    <div className="col-md-6" style={{display:'none'}}>
+                    <div className="col-md-6" style={{ display: "none" }}>
                       <div className="form-floating form-floating-outline mb-4">
                         <input
                           type="text"
@@ -1085,7 +1122,6 @@ class PostForm extends Component {
                 </div>
               </div>
             </div>
-
             <div className="accordion-item ">
               <h2 className="accordion-header">
                 <button
@@ -1255,64 +1291,6 @@ class PostForm extends Component {
                 </div>
               </div>
             </div>
-
-            <div className="accordion-item " style={{display:'none'}}>
-              <h2 className="accordion-header">
-                <button
-                  type="button"
-                  className="accordion-button collapsed"
-                  data-bs-toggle="collapse"
-                  data-bs-target="#accordionstock"
-                  aria-expanded="false"
-                >
-                  Available
-                </button>
-              </h2>
-
-              <div
-                id="accordionstock"
-                className="accordion-collapse collapse"
-                data-bs-parent="#accordionStyle1"
-              >
-                <div className="accordion-body">
-                  <div className="row g-3">
-                    {this.props.availabiltyList.length > 0 &&
-                      this.props.availabiltyList.map((item, index) => {
-                        return (
-                          <div className="col-md-2" key={index}>
-                            <div className="form-check mt-3">
-                              <input
-                                className="form-check-input"
-                                type="checkbox"
-                                value={item.av_id}
-                                id={"avail_" + index}
-                                checked={
-                                  fields.assign_availability.indexOf(
-                                    item.av_id
-                                  ) >= 0
-                                    ? true
-                                    : false
-                                }
-                                onChange={this.handleChangeCheck.bind(
-                                  this,
-                                  "assign_availability"
-                                )}
-                              />
-                              <label
-                                className="form-check-label"
-                                htmlFor={"avail_" + index}
-                              >
-                                {item.av_name}
-                              </label>
-                            </div>
-                          </div>
-                        );
-                      })}
-                  </div>
-                </div>
-              </div>
-            </div>
-
             <div className="accordion-item ">
               <h2 className="accordion-header">
                 <button
@@ -1381,202 +1359,7 @@ class PostForm extends Component {
                 </div>
               </div>
             </div>
-
-            <div className="accordion-item " style={{display:'none'}}>
-              <h2 className="accordion-header">
-                <button
-                  type="button"
-                  className="accordion-button collapsed"
-                  data-bs-toggle="collapse"
-                  data-bs-target="#accordiongallery"
-                  aria-expanded="false"
-                >
-                  Invoice
-                </button>
-              </h2>
-
-              <div
-                id="accordiongallery"
-                className="accordion-collapse collapse"
-                data-bs-parent="#accordionStyle1"
-              >
-                <div className="accordion-body">
-                  <div className="row g-3">
-                    <div className="col-md-6">
-                      <div className="form-floating form-floating-outline mb-4">
-                        <input
-                          type="text"
-                          className="form-control"
-                          name="company_gst_no"
-                          value={fields.company_gst_no}
-                          {...$field("company_gst_no", (e) =>
-                            onChange("company_gst_no", e.target.value)
-                          )}
-                        />
-                        <label htmlFor="company_gst_no">GST Reg. No</label>
-                      </div>
-                    </div>
-                    <div className="col-md-6"></div>
-                    <div className="col-md-6">
-                      <div className="form-floating form-floating-outline mb-4">
-                        <div className="mb-3">
-                          <label htmlFor="formFile" className="form-label">
-                            Invoice Logo <span className="error">*</span>
-                          </label>
-                          <input
-                            className={
-                              errMsgInvoiceLogo !== "" &&
-                              errMsgInvoiceLogo !== false &&
-                              errMsgInvoiceLogo !== undefined
-                                ? "form-control is-invalid"
-                                : "form-control"
-                            }
-                            type="file"
-                            id="company_invoice_logo"
-                            onChange={(event) => {
-                              this.uplaodFiles("company_invoice_logo", event);
-                              return false;
-                            }}
-                          />
-
-                          {errMsgInvoiceLogo}
-                        </div>
-                      </div>
-                      {fields.company_invoice_logo !== "" && (
-                        <div className="dz-preview dz-processing dz-image-preview dz-success dz-complete">
-                          <div className="dz-details">
-                            <div className="dz-thumbnail">
-                              <img alt="" src={fields.company_invoice_logo} />
-                            </div>
-                          </div>
-                          <a
-                            className="dz-remove"
-                            href={void 0}
-                            onClick={this.removeImage.bind(
-                              this,
-                              fields.company_invoice_logo,
-                              "company_invoice_logo"
-                            )}
-                          >
-                            Remove file
-                          </a>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="accordion-item " style={{display:'none'}}>
-              <h2 className="accordion-header">
-                <button
-                  type="button"
-                  className="accordion-button collapsed"
-                  data-bs-toggle="collapse"
-                  data-bs-target="#accordiontimeavailability"
-                  aria-expanded="false"
-                >
-                  Promotion Settings
-                </button>
-              </h2>
-
-              <div
-                id="accordiontimeavailability"
-                className="accordion-collapse collapse"
-                data-bs-parent="#accordionStyle1"
-              >
-                <div className="accordion-body">
-                  <div className="row g-3">
-                    <div className="col-md-2">
-                      <div className="form-check mt-3">
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          id="enable_promotion_code_popup"
-                          checked={
-                            fields.enable_promotion_code_popup === "Yes"
-                              ? true
-                              : false
-                          }
-                          onChange={this.handleChangeCheck.bind(
-                            this,
-                            "enable_promotion_code_popup"
-                          )}
-                        />
-                        <label
-                          className="form-check-label"
-                          htmlFor="enable_promotion_code_popup"
-                        >
-                          Promotion Code Popup
-                        </label>
-                      </div>
-                    </div>
-                    <div className="col-md-2">
-                      <div className="form-check mt-3">
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          value="Yes"
-                          id="enable_normal_popup"
-                          checked={
-                            fields.enable_normal_popup === "Yes" ? true : false
-                          }
-                          onChange={this.handleChangeCheck.bind(
-                            this,
-                            "enable_normal_popup"
-                          )}
-                        />
-                        <label
-                          className="form-check-label"
-                          htmlFor="enable_normal_popup"
-                        >
-                          Normal Popup
-                        </label>
-                      </div>
-                    </div>
-                    <div className="col-md-4">
-                      <div className="form-floating form-floating-outline custm-select-box mb-4">
-                        <Select
-                          value={fields.first_time_order_promotion}
-                          onChange={this.handleSelectChange.bind(
-                            this,
-                            "first_time_order_promotion"
-                          )}
-                          placeholder="Select First Time Order Promo Code"
-                          options={this.props.promoList}
-                        />
-                        <label className="select-box-label">
-                          First Time Order Promo Code
-                        </label>
-                      </div>
-                    </div>
-                    <div className="col-md-4">
-                      <div className="form-floating form-floating-outline custm-select-box mb-4">
-                        {console.log(
-                          this.props.promoList,
-                          "this.props.promoList"
-                        )}
-                        <Select
-                          value={fields.new_signup_promotion}
-                          onChange={this.handleSelectChange.bind(
-                            this,
-                            "new_signup_promotion"
-                          )}
-                          placeholder="Select Promocode For New Signup"
-                          options={this.props.promoList}
-                        />
-                        <label className="select-box-label">
-                          Promocode For New Signup
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="accordion-item" style={{display:'none'}}>
+            <div className="accordion-item" style={{ display: "none" }}>
               <h2 className="accordion-header">
                 <button
                   type="button"
@@ -1664,105 +1447,6 @@ class PostForm extends Component {
                 </div>
               </div>
             </div>
-
-            <div className="accordion-item" style={{display:'none'}}>
-              <h2 className="accordion-header">
-                <button
-                  type="button"
-                  className="accordion-button collapsed"
-                  data-bs-toggle="collapse"
-                  data-bs-target="#accordionsocialmedia-1"
-                  aria-expanded="false"
-                >
-                  Social Media Links
-                </button>
-              </h2>
-
-              <div
-                id="accordionsocialmedia-1"
-                className="accordion-collapse collapse"
-                data-bs-parent="#accordionStyle1"
-              >
-                <div className="accordion-body">
-                  {fields.social_media.length > 0 &&
-                    fields.social_media.map((item, index) => {
-                      return (
-                        <div className="row g-3" key={index}>
-                          <div className="col-md-3">
-                            <div className="form-floating form-floating-outline custm-select-box mb-4">
-                              <Select
-                                value={item.social_media_type}
-                                onChange={this.handleSelectSocial.bind(
-                                  this,
-                                  index,
-                                  "social_media_type"
-                                )}
-                                placeholder="Select Social Media Type"
-                                options={socilaMediaList}
-                              />
-                              <label className="select-box-label">
-                                Social Media Type
-                              </label>
-                            </div>
-                          </div>
-                          <div className="col-md-6">
-                            <div className="form-floating form-floating-outline mb-4">
-                              <input
-                                type="text"
-                                className="form-control"
-                                name="social_media_link"
-                                value={item.social_media_link}
-                                onChange={this.handleSelectSocial.bind(
-                                  this,
-                                  index,
-                                  "social_media_link"
-                                )}
-                              />
-                              <label htmlFor="social_media_link">Link</label>
-                            </div>
-                          </div>
-                          <div className="col-md-1 mt-4">
-                            {fields.social_media.length - 1 === index &&
-                            fields.social_media.length !=
-                              socilaMediaList.length ? (
-                              <div className="d-flex justify-content-center ml-4">
-                                {fields.social_media.length > 1 && (
-                                  <button
-                                    type="button"
-                                    className="btn btn-primary me-sm-3 me-1 waves-effect waves-light"
-                                    onClick={this.removeSocialMedia.bind(this)}
-                                  >
-                                    <span className="mdi mdi-minus"></span>
-                                  </button>
-                                )}
-                                <button
-                                  type="button"
-                                  className="btn btn-primary me-sm-3 me-1 waves-effect waves-light"
-                                  onClick={this.addSocialMedia.bind(this)}
-                                >
-                                  <span className="mdi mdi-plus"></span>
-                                </button>
-                              </div>
-                            ) : (
-                              <button
-                                type="button"
-                                className="btn btn-primary me-sm-3 me-1 waves-effect waves-light"
-                                onClick={this.removeSocialMedia.bind(
-                                  this,
-                                  index
-                                )}
-                              >
-                                <span className="mdi mdi-minus"></span>
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                </div>
-              </div>
-            </div>
-
             <div className="accordion-item">
               <h2 className="accordion-header">
                 <button
@@ -2041,7 +1725,6 @@ class PostForm extends Component {
                 </div>
               </div>
             </div>
-
             <div className="accordion-item">
               <h2 className="accordion-header">
                 <button
@@ -2089,10 +1772,6 @@ class PostForm extends Component {
                     </div>
                     <div className="col-md-12">
                       <label>Maintenance Mode Description</label>
-                      {console.log(
-                        fields.maintenance_mode_description,
-                        "fields.maintenance_mode_description"
-                      )}
                       <Editor
                         setContent={this.setContent}
                         data={fields.maintenance_mode_description}
@@ -2102,7 +1781,6 @@ class PostForm extends Component {
                 </div>
               </div>
             </div>
-            
             <div className="accordion-item ">
               <h2 className="accordion-header">
                 <button
@@ -2140,8 +1818,7 @@ class PostForm extends Component {
                         <label className="select-box-label">Mode</label>
                       </div>
                     </div>
-                    <div className="col-md-6">
-                    </div>
+                    <div className="col-md-6"></div>
                   </div>
                   <div className="row g-3">
                     <div className="col-md-6">
@@ -2158,7 +1835,10 @@ class PostForm extends Component {
                           name="company_stripe_public_live"
                           value={fields.company_stripe_public_live}
                           {...$field("company_stripe_public_live", (e) =>
-                            onChange("company_stripe_public_live", e.target.value)
+                            onChange(
+                              "company_stripe_public_live",
+                              e.target.value
+                            )
                           )}
                           id="company_stripe_public_live"
                         />
@@ -2184,7 +1864,10 @@ class PostForm extends Component {
                           name="company_stripe_secret_live"
                           value={fields.company_stripe_secret_live}
                           {...$field("company_stripe_secret_live", (e) =>
-                            onChange("company_stripe_secret_live", e.target.value)
+                            onChange(
+                              "company_stripe_secret_live",
+                              e.target.value
+                            )
                           )}
                           id="company_stripe_secret_live"
                         />
@@ -2212,7 +1895,10 @@ class PostForm extends Component {
                           name="company_stripe_public_test"
                           value={fields.company_stripe_public_test}
                           {...$field("company_stripe_public_test", (e) =>
-                            onChange("company_stripe_public_test", e.target.value)
+                            onChange(
+                              "company_stripe_public_test",
+                              e.target.value
+                            )
                           )}
                           id="company_stripe_public_test"
                         />
@@ -2238,7 +1924,10 @@ class PostForm extends Component {
                           name="company_stripe_secret_test"
                           value={fields.company_stripe_secret_test}
                           {...$field("company_stripe_secret_test", (e) =>
-                            onChange("company_stripe_secret_test", e.target.value)
+                            onChange(
+                              "company_stripe_secret_test",
+                              e.target.value
+                            )
                           )}
                           id="company_stripe_secret_test"
                         />
@@ -2255,7 +1944,79 @@ class PostForm extends Component {
                 </div>
               </div>
             </div>
+            {fields.enable_subscription && (
+              <div className="accordion-item ">
+                <h2 className="accordion-header">
+                  <button
+                    type="button"
+                    className="accordion-button collapsed"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#accordionsubscription"
+                    aria-expanded="false"
+                  >
+                    Store Subscription
+                  </button>
+                </h2>
 
+                <div
+                  id="accordionsubscription"
+                  className="accordion-collapse collapse"
+                  data-bs-parent="#accordionStyle1"
+                >
+                  <div className="accordion-body">
+                    <div className="row g-3">
+                      {subscriptionTypes.map((item, index) => {
+                        return (
+                          <div className="row g-3" key={index}>
+                            <div className="col-md-1">
+                              <h5 className="mb-0">{item}</h5>
+                            </div>
+                            <div className="col-md-2">
+                              <div className="form-floating form-floating-outline mb-4">
+                                <input
+                                  type="text"
+                                  className="form-control"
+                                  name="alias_name"
+                                  value={
+                                    fields.subscription[item.toLowerCase()]
+                                      .amount
+                                  }
+                                  onChange={this.handleChangeSubscription.bind(
+                                    this,
+                                    item,
+                                    "amount"
+                                  )}
+                                />
+                                <label htmlFor="alias_name">Amount</label>
+                              </div>
+                            </div>
+                            <div className="col-md-2">
+                              <div className="form-floating form-floating-outline mb-4">
+                                <input
+                                  type="text"
+                                  className="form-control"
+                                  name="infotext"
+                                  value={
+                                    fields.subscription[item.toLowerCase()]
+                                      .infotext
+                                  }
+                                  onChange={this.handleChangeSubscription.bind(
+                                    this,
+                                    item,
+                                    "infotext"
+                                  )}
+                                />
+                                <label htmlFor="alias_name">Save Text</label>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           <div

@@ -4,8 +4,6 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import { connect } from "react-redux";
 import Select from "react-select";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
 import update from "immutability-helper";
 import { validated } from "react-custom-validation";
 import { GET_FORMPOST, GET_DETAILDATA } from "../../../actions";
@@ -25,7 +23,6 @@ import {
   CompanyID,
   isEmpty,
   isSingleSelect,
-  isValidPrice,
 } from "../../Helpers/SettingHelper";
 import PageLoader from "../../Helpers/PageLoader";
 import Header from "../Layout/Header";
@@ -36,16 +33,21 @@ import AWS from "aws-sdk";
 AWS.config.update(awsCredentials);
 const s3 = new AWS.S3();
 var module = "clientpanel/paintbasedproducts/";
-var moduleName = "Product";
-var modulePath = "/clientpanel/catalog-products";
-import { format } from "date-fns";
+var moduleName = "Subscription";
+var modulePath = "/clientpanel/subscription";
+var emptyVoucher = [{ product: "", quantity: "" }];
+var subscriptionTypes = [
+  "Weekly",
+  "Monthly",
+  "Quarterly",
+  "Biannually",
+  "Annually",
+];
 class Form extends Component {
   constructor(props) {
     super(props);
     var editID = "";
-    if (
-      this.props.match.path === "/clientpanel/catalog-products/edit/:EditID"
-    ) {
+    if (this.props.match.path === "/clientpanel/subscription/edit/:EditID") {
       editID = this.props.match.params.EditID;
     }
     this.state = {
@@ -53,26 +55,39 @@ class Form extends Component {
       pageloading: false,
       clientdata: {
         assign_outlet: "",
-        product_type: "",
-        company_catid: "",
         product_name: "",
         alias_name: "",
         sku: "",
         short_description: "",
         long_description: "",
-        price: "",
-        special_price: "",
-        special_price_from_date: "",
-        special_price_to_date: "",
         status: [],
-        voucher_expity_date: "",
         thumbnail: "",
         subscription: {
-          weekly: { amount: "", infotext: "" },
-          monthly: { amount: "", infotext: "" },
-          quarterly: { amount: "", infotext: "" },
-          biannually: { amount: "", infotext: "" },
-          annually: { amount: "", infotext: "" },
+          weekly: {
+            amount: "",
+            infotext: "",
+            vouchers: emptyVoucher,
+          },
+          monthly: {
+            amount: "",
+            infotext: "",
+            vouchers: emptyVoucher,
+          },
+          quarterly: {
+            amount: "",
+            infotext: "",
+            vouchers: emptyVoucher,
+          },
+          biannually: {
+            amount: "",
+            infotext: "",
+            vouchers: emptyVoucher,
+          },
+          annually: {
+            amount: "",
+            infotext: "",
+            vouchers: emptyVoucher,
+          },
         },
         action: "add",
       },
@@ -80,17 +95,14 @@ class Form extends Component {
       formpost: [],
       companyDetail: [],
       outletList: [],
-      productTypeList: [],
-      companyCatList: [],
+      voucherList: [],
     };
     this.handleChange = this.handleChange.bind(this);
   }
 
   componentDidMount() {
     this.loadOutlet();
-    this.loadproductTypeList();
-    this.comapanyCatlist();
-
+    this.loadVoucherProduct();
     if (this.state.editID !== "") {
       var params = {
         params: "company_id=" + CompanyID() + "&detail_id=" + this.state.editID,
@@ -142,33 +154,11 @@ class Form extends Component {
               : "";
           var clientupdatedata = {
             assign_outlet: result.outlet.length > 0 ? result.outlet[0] : "",
-            product_type: result.product_type,
-            company_catid: result.product_company_catid,
             product_name: result.product_name,
             alias_name: result.product_alias,
             sku: result.product_sku,
             short_description: result.product_short_description,
             long_description: result.product_long_description,
-            price: result.product_price,
-            special_price: result.product_special_price,
-            special_price_from_date:
-              result.product_special_price_from_date !== "" &&
-              result.product_special_price_from_date !== null &&
-              result.product_special_price_from_date !== "0000-00-00"
-                ? new Date(result.product_special_price_from_date)
-                : "",
-            special_price_to_date:
-              result.product_special_price_to_date !== "" &&
-              result.product_special_price_to_date !== null &&
-              result.product_special_price_to_date !== "0000-00-00"
-                ? new Date(result.product_special_price_to_date)
-                : "",
-            voucher_expity_date:
-              result.product_voucher_expiry_date !== "" &&
-              result.product_voucher_expiry_date !== null &&
-              result.product_voucher_expiry_date !== "0000-00-00"
-                ? new Date(result.product_voucher_expiry_date)
-                : "",
             thumbnail:
               result.product_thumbnail !== "" &&
               result.product_thumbnail !== null
@@ -179,11 +169,31 @@ class Form extends Component {
               result.product_subscription !== null
                 ? JSON.parse(result.product_subscription)
                 : {
-                    weekly: { amount: "", infotext: "" },
-                    monthly: { amount: "", infotext: "" },
-                    quarterly: { amount: "", infotext: "" },
-                    biannually: { amount: "", infotext: "" },
-                    annually: { amount: "", infotext: "" },
+                    weekly: {
+                      amount: "",
+                      infotext: "",
+                      vouchers: emptyVoucher,
+                    },
+                    monthly: {
+                      amount: "",
+                      infotext: "",
+                      vouchers: emptyVoucher,
+                    },
+                    quarterly: {
+                      amount: "",
+                      infotext: "",
+                      vouchers: emptyVoucher,
+                    },
+                    biannually: {
+                      amount: "",
+                      infotext: "",
+                      vouchers: emptyVoucher,
+                    },
+                    annually: {
+                      amount: "",
+                      infotext: "",
+                      vouchers: emptyVoucher,
+                    },
                   },
             status: status,
             action: "edit",
@@ -207,25 +217,16 @@ class Form extends Component {
       }
     });
   }
-
-  comapanyCatlist() {
+  loadVoucherProduct() {
     var urlShringTxt =
       apiUrl +
-      "clientpanel/paintbasedproducts/comapany_catlist?company_id=" +
-      CompanyID();
+      module +
+      "dropdownVoucher?company_id=" +
+      CompanyID() +
+      "&product_type=5";
     axios.get(urlShringTxt, clientheaderconfig).then((res) => {
       if (res.data.status === "ok") {
-        this.setState({ companyCatList: res.data.result });
-      }
-    });
-  }
-
-  loadproductTypeList() {
-    var urlShringTxt =
-      apiUrl + module + "productType?company_id=" + CompanyID();
-    axios.get(urlShringTxt, clientheaderconfig).then((res) => {
-      if (res.data.status === "ok") {
-        this.setState({ productTypeList: res.data.result });
+        this.setState({ voucherList: res.data.result });
       }
     });
   }
@@ -251,16 +252,47 @@ class Form extends Component {
   };
 
   handleSubmit = () => {
-    showLoader("submit_frm", "class");
     var postData = this.state.clientdata;
+    var cycleerror = 0;
+    //var producterror = "";
 
-    var product_type =
-      Object.keys(postData.product_type).length > 0
-        ? postData.product_type.value
-        : "";
+    var subscription = postData.subscription;
+    var updsubscription = [];
+    subscriptionTypes.map((item) => {
+      var subscribe = subscription[item.toLowerCase()];
 
+      var updvouchers = [];
+      if (subscribe.vouchers.length > 0) {
+        subscribe.vouchers.map((vitem) => {
+          var product = vitem?.product || "";
+          var quantity = vitem?.quantity || "";
+          if (product !== "" && quantity !== "") {
+            updvouchers.push({
+              product: product.value,
+              quantity: quantity,
+            });
+          }
+        });
+      }
+      if (updvouchers.length === 0) {
+        updvouchers.push(emptyVoucher[0]);
+      }
+      if (subscribe.amount.trim() !== "") {
+        cycleerror++;
+      }
+      updsubscription[item.toLowerCase()] = {
+        amount: subscribe.amount,
+        infotext: subscribe.infotext,
+        vouchers: updvouchers,
+      };
+    });
+    if (cycleerror === 0) {
+      showAlert("warning", "Please Select Any One Subscription Cycle");
+      return false;
+    }
+    showLoader("submit_frm", "class");
     var postObject = {
-      product_type: product_type,
+      product_type: 6,
       product_name: postData.product_name,
       shop_type: 1,
       alias_name: postData.alias_name,
@@ -270,33 +302,12 @@ class Form extends Component {
       thumbnail: "",
       status:
         Object.keys(postData.status).length > 0 ? postData.status.value : "A",
-      price: postData.price,
-      special_price: postData.special_price,
-      special_price_from_date:
-        parseFloat(postData.special_price) > 0 &&
-        postData.special_price_from_date !== ""
-          ? format(postData.special_price_from_date, "yyyy-MM-dd")
-          : "",
-      special_price_to_date:
-        parseFloat(postData.special_price) > 0 &&
-        postData.special_price_to_date !== ""
-          ? format(postData.special_price_to_date, "yyyy-MM-dd")
-          : "",
       paired_products: "",
       assign_outlet:
         Object.keys(postData.assign_outlet).length > 0
           ? postData.assign_outlet.value
           : "",
-      company_catid:
-        Object.keys(postData.company_catid).length > 0
-          ? postData.company_catid.value
-          : "",
-      voucher_expity_date:
-        product_type === "5"
-          ? postData.voucher_expity_date !== ""
-            ? format(postData.voucher_expity_date, "yyyy-MM-dd")
-            : ""
-          : "",
+      company_catid: 17,
       thumbnail: postData.thumbnail,
       subscription: JSON.stringify(postData.subscription),
       status:
@@ -319,7 +330,7 @@ class Form extends Component {
     return (
       <div className="layout-wrapper layout-content-navbar">
         <div className="layout-container">
-          <Header {...this.props} currentPage={"catalog-products"} />
+          <Header {...this.props} currentPage={"subscription"} />
           <div className="layout-page">
             <Topmenu />
             <div className="content-wrapper">
@@ -349,8 +360,7 @@ class Form extends Component {
                   onValid={this.handleSubmit}
                   error_msg={this.state.error_msg}
                   outletList={this.state.outletList}
-                  companyCatList={this.state.companyCatList}
-                  productTypeList={this.state.productTypeList}
+                  voucherList={this.state.voucherList}
                   onInvalid={() => {
                     console.log("Form invalid!");
                     setTimeout(function () {
@@ -403,40 +413,15 @@ const mapDispatchToProps = (dispatch) => {
 export default connect(mapStateTopProps, mapDispatchToProps)(Form);
 
 function validationConfig(props) {
-  const {
-    assign_outlet,
-    product_type,
-    company_catid,
-    product_name,
-    sku,
-    price,
-    special_price,
-    status,
-  } = props.fields;
+  const { assign_outlet, product_name, sku, status } = props.fields;
 
   return {
-    fields: [
-      "assign_outlet",
-      "product_type",
-      "company_catid",
-      "product_name",
-      "sku",
-      "price",
-      "special_price",
-      "status",
-    ],
+    fields: ["assign_outlet", "product_name", "sku", "status"],
 
     validations: {
       assign_outlet: [[isSingleSelect, assign_outlet]],
-      product_type: [[isSingleSelect, product_type]],
-      company_catid: [[isSingleSelect, company_catid]],
       product_name: [[isEmpty, product_name]],
       sku: [[isEmpty, sku]],
-      price: [
-        [isEmpty, price],
-        [isValidPrice, price],
-      ],
-      special_price: [[isValidPrice, special_price]],
       status: [[isSingleSelect, status]],
     },
   };
@@ -476,10 +461,57 @@ class PostForm extends Component {
       }
     }
     subscription[nameDetails][name] = event.target.value;
-    this.props.onChange(subscription, subscription);
+    this.props.onChange("subscription", subscription);
   }
-  myFilter(elm) {
-    return elm != null && elm !== false && elm !== "";
+
+  handleChangeVoucher(cycleType, updIndex, name, event) {
+    var subscription = this.props.fields.subscription;
+    var vouchers = subscription[cycleType]["vouchers"];
+    var updatevoucher = [];
+    if (vouchers.length > 0) {
+      vouchers.map((item, index) => {
+        if (updIndex === index) {
+          var product = item.product;
+          if (name === "product") {
+            product = event;
+          }
+          var quantity = item.quantity;
+          if (name === "quantity") {
+            var validNumber = new RegExp(/^\d*\.?\d*$/);
+            if (validNumber.test(event.target.value)) {
+              quantity = event.target.value;
+            }
+          }
+          updatevoucher.push({ product: product, quantity: quantity });
+        } else {
+          updatevoucher.push(item);
+        }
+      });
+    }
+    subscription[cycleType]["vouchers"] = updatevoucher;
+    this.props.onChange("subscription", subscription);
+  }
+
+  addVoucher(cycleType) {
+    var subscription = this.props.fields.subscription;
+    var vouchers = subscription[cycleType]["vouchers"];
+    vouchers.push(emptyVoucher);
+    subscription[cycleType]["vouchers"] = vouchers;
+    this.props.onChange("subscription", subscription);
+  }
+  removeVoucher(cycleType, removeIndex) {
+    var subscription = this.props.fields.subscription;
+    var vouchers = subscription[cycleType]["vouchers"];
+    var updatevoucher = [];
+    if (vouchers.length > 0) {
+      vouchers.map((item, index) => {
+        if (removeIndex !== index) {
+          updatevoucher.push(item);
+        }
+      });
+    }
+    subscription[cycleType]["vouchers"] = updatevoucher;
+    this.props.onChange("subscription", subscription);
   }
 
   async uplaodFiles(imageType) {
@@ -511,29 +543,17 @@ class PostForm extends Component {
     const { fields, onChange, onValid, onInvalid, $field, $validation } =
       this.props;
     let errMsgOutlet,
-      errMsgProductType,
       errMsgCompanyCatId,
       errMsgProName,
       errMsgsku,
-      errMsgStatus,
-      errMsgProPrice,
-      errMsgProSpecialPrice;
+      errMsgStatus;
 
     if ($validation.assign_outlet.error.reason !== undefined) {
       errMsgOutlet = $validation.assign_outlet.show && (
         <span className="error">{$validation.assign_outlet.error.reason}</span>
       );
     }
-    if ($validation.product_type.error.reason !== undefined) {
-      errMsgProductType = $validation.product_type.show && (
-        <span className="error">{$validation.product_type.error.reason}</span>
-      );
-    }
-    if ($validation.company_catid.error.reason !== undefined) {
-      errMsgCompanyCatId = $validation.company_catid.show && (
-        <span className="error">{$validation.company_catid.error.reason}</span>
-      );
-    }
+
     if ($validation.product_name.error.reason !== undefined) {
       errMsgProName = $validation.product_name.show && (
         <span className="error">{$validation.product_name.error.reason}</span>
@@ -544,35 +564,12 @@ class PostForm extends Component {
         <span className="error">{$validation.sku.error.reason}</span>
       );
     }
-    if ($validation.price.error.reason !== undefined) {
-      errMsgProPrice = $validation.price.show && (
-        <span className="error">{$validation.price.error.reason}</span>
-      );
-    }
-    if ($validation.special_price.error.reason !== undefined) {
-      errMsgProSpecialPrice = $validation.special_price.show && (
-        <span className="error">{$validation.special_price.error.reason}</span>
-      );
-    }
 
     if ($validation.status.error.reason !== undefined) {
       errMsgStatus = $validation.status.show && (
         <span className="error">{$validation.status.error.reason}</span>
       );
     }
-    var producttype = "";
-    if (fields.product_type !== "") {
-      if (fields.product_type.value === "2") {
-        producttype = fields.product_type.value;
-      }
-    }
-    var subscriptionTypes = [
-      "Weekly",
-      "Monthly",
-      "Quarterly",
-      "Biannually",
-      "Annually",
-    ];
 
     return (
       <form className="card fv-plugins-bootstrap5" id="modulefrm">
@@ -626,60 +623,6 @@ class PostForm extends Component {
                         {errMsgOutlet}
                       </div>
                     </div>
-                    <div
-                      className={
-                        errMsgProductType !== "" &&
-                        errMsgProductType !== false &&
-                        errMsgProductType !== undefined
-                          ? "col-md-6 error-select error"
-                          : "col-md-6"
-                      }
-                    >
-                      <div className="form-floating form-floating-outline custm-select-box mb-4">
-                        <Select
-                          value={fields.product_type}
-                          onChange={this.handleSelectChange.bind(
-                            this,
-                            "product_type"
-                          )}
-                          placeholder={"Select Product Type"}
-                          options={this.props.productTypeList}
-                          isClearable={true}
-                        />
-                        <label className="select-box-label">
-                          Product Type<span className="error">*</span>
-                        </label>
-                        {errMsgProductType}
-                      </div>
-                    </div>
-
-                    <div
-                      className={
-                        errMsgCompanyCatId !== "" &&
-                        errMsgCompanyCatId !== false &&
-                        errMsgCompanyCatId !== undefined
-                          ? "col-md-6 error-select error"
-                          : "col-md-6"
-                      }
-                    >
-                      <div className="form-floating form-floating-outline custm-select-box mb-4">
-                        <Select
-                          value={fields.company_catid}
-                          onChange={this.handleSelectChange.bind(
-                            this,
-                            "company_catid"
-                          )}
-                          placeholder={"Select Category"}
-                          options={this.props.companyCatList}
-                          isClearable={true}
-                        />
-                        <label className="select-box-label">
-                          Company Category<span className="error">*</span>
-                        </label>
-                        {errMsgCompanyCatId}
-                      </div>
-                    </div>
-
                     <div className="col-md-6">
                       <div className="form-floating form-floating-outline mb-4">
                         <input
@@ -740,115 +683,6 @@ class PostForm extends Component {
                         {errMsgsku}
                       </div>
                     </div>
-                    <div className="col-md-6">
-                      <div className="form-floating form-floating-outline mb-4 custm-date-box">
-                        <DatePicker
-                          peekNextMonth
-                          showMonthDropdown
-                          showYearDropdown
-                          dropdownMode="select"
-                          className="form-control"
-                          selected={fields.voucher_expity_date}
-                          minDate={new Date()}
-                          dateFormat="dd/MM/yyyy"
-                          onChange={this.handleChange.bind(
-                            this,
-                            "voucher_expity_date"
-                          )}
-                        />
-                        <label className="select-box-label">
-                          Voucher Expiry Date
-                        </label>
-                      </div>
-                    </div>
-
-                    <div className="col-md-6">
-                      <div className="form-floating form-floating-outline mb-4">
-                        <input
-                          type="text"
-                          className={
-                            errMsgProPrice !== "" &&
-                            errMsgProPrice !== false &&
-                            errMsgProPrice !== undefined
-                              ? "form-control is-invalid"
-                              : "form-control"
-                          }
-                          name="price"
-                          value={fields.price}
-                          {...$field("price", (e) =>
-                            onChange("price", e.target.value)
-                          )}
-                        />
-                        <label htmlFor="price">
-                          Product Price <span className="error">*</span>
-                        </label>
-                        {errMsgProPrice}
-                      </div>
-                    </div>
-                    <div className="col-md-6">
-                      <div className="form-floating form-floating-outline mb-4">
-                        <input
-                          type="text"
-                          className={
-                            errMsgProSpecialPrice !== "" &&
-                            errMsgProSpecialPrice !== false &&
-                            errMsgProSpecialPrice !== undefined
-                              ? "form-control is-invalid"
-                              : "form-control"
-                          }
-                          name="special_price"
-                          value={fields.special_price}
-                          {...$field("special_price", (e) =>
-                            onChange("special_price", e.target.value)
-                          )}
-                        />
-                        <label htmlFor="special_price">Special Price</label>
-                        {errMsgProSpecialPrice}
-                      </div>
-                    </div>
-                    <div className="col-md-6">
-                      <div className="form-floating form-floating-outline mb-4 custm-date-box">
-                        <DatePicker
-                          peekNextMonth
-                          showMonthDropdown
-                          showYearDropdown
-                          dropdownMode="select"
-                          className="form-control"
-                          selected={fields.special_price_from_date}
-                          minDate={new Date()}
-                          dateFormat="dd/MM/yyyy"
-                          onChange={this.handleChange.bind(
-                            this,
-                            "special_price_from_date"
-                          )}
-                        />
-                        <label className="select-box-label">
-                          Special Price From Date
-                        </label>
-                      </div>
-                    </div>
-                    <div className="col-md-6">
-                      <div className="form-floating form-floating-outline mb-4 custm-date-box">
-                        <DatePicker
-                          peekNextMonth
-                          showMonthDropdown
-                          showYearDropdown
-                          dropdownMode="select"
-                          className="form-control"
-                          selected={fields.special_price_to_date}
-                          minDate={new Date()}
-                          dateFormat="dd/MM/yyyy"
-                          onChange={this.handleChange.bind(
-                            this,
-                            "special_price_to_date"
-                          )}
-                        />
-                        <label className="select-box-label">
-                          Special Price To Date
-                        </label>
-                      </div>
-                    </div>
-
                     <div className="col-md-12">
                       <label>Short Description</label>
                       <Editor
@@ -937,78 +771,172 @@ class PostForm extends Component {
                 </div>
               </div>
             </div>
-            {fields.product_type?.value === "6" && (
-              <div className="accordion-item">
-                <h2 className="accordion-header">
-                  <button
-                    type="button"
-                    className="accordion-button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#accordionStyle1-4"
-                    aria-expanded="true"
-                  >
-                    Subscription
-                  </button>
-                </h2>
-                <div
-                  id="accordionStyle1-4"
-                  className="accordion-collapse collapse  mt-3"
-                  data-bs-parent="#accordionStyle4"
+
+            <div className="accordion-item">
+              <h2 className="accordion-header">
+                <button
+                  type="button"
+                  className="accordion-button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#accordionStyle1-4"
+                  aria-expanded="true"
                 >
-                  <div className="accordion-body">
-                    <div className="row g-3">
-                      {subscriptionTypes.map((item, index) => {
-                        return (
-                          <div className="row g-3" key={index}>
-                            <div className="col-md-1">
-                              <h5 class="mb-0">{item}</h5>
-                            </div>
-                            <div className="col-md-2">
-                              <div className="form-floating form-floating-outline mb-4">
-                                <input
-                                  type="text"
-                                  className="form-control"
-                                  name="alias_name"
-                                  value={
-                                    fields.subscription[item.toLowerCase()]
-                                      .amount
-                                  }
-                                  onChange={this.handleChangeSubscription.bind(
-                                    this,
-                                    item,
-                                    "amount"
-                                  )}
-                                />
-                                <label htmlFor="alias_name">Amount</label>
-                              </div>
-                            </div>
-                            <div className="col-md-2">
-                              <div className="form-floating form-floating-outline mb-4">
-                                <input
-                                  type="text"
-                                  className="form-control"
-                                  name="infotext"
-                                  value={
-                                    fields.subscription[item.toLowerCase()]
-                                      .infotext
-                                  }
-                                  onChange={this.handleChangeSubscription.bind(
-                                    this,
-                                    item,
-                                    "infotext"
-                                  )}
-                                />
-                                <label htmlFor="alias_name">Save Text</label>
-                              </div>
+                  Subscription
+                </button>
+              </h2>
+              <div
+                id="accordionStyle1-4"
+                className="accordion-collapse collapse  mt-3"
+                data-bs-parent="#accordionStyle4"
+              >
+                <div className="accordion-body">
+                  <div className="row g-3">
+                    {subscriptionTypes.map((item, index) => {
+                      var subscribe = fields.subscription[item.toLowerCase()];
+                      return (
+                        <div className="row g-3" key={index}>
+                          <div className="col-md-1">
+                            <h5 class="mb-0">{item}</h5>
+                          </div>
+                          <div className="col-md-2">
+                            <div className="form-floating form-floating-outline mb-4">
+                              <input
+                                type="text"
+                                className="form-control"
+                                name="alias_name"
+                                value={subscribe.amount}
+                                onChange={this.handleChangeSubscription.bind(
+                                  this,
+                                  item,
+                                  "amount"
+                                )}
+                              />
+                              <label htmlFor="alias_name">Amount</label>
                             </div>
                           </div>
-                        );
-                      })}
-                    </div>
+                          <div className="col-md-2">
+                            <div className="form-floating form-floating-outline mb-4">
+                              <input
+                                type="text"
+                                className="form-control"
+                                name="infotext"
+                                value={subscribe.infotext}
+                                onChange={this.handleChangeSubscription.bind(
+                                  this,
+                                  item,
+                                  "infotext"
+                                )}
+                              />
+                              <label htmlFor="alias_name">Save Text</label>
+                            </div>
+                          </div>
+                          <div className="col-md-1"></div>
+                          {subscribe.vouchers.length > 0 && (
+                            <div className="col-md-7">
+                              <ul class="list-group">
+                                <li className="list-group-item list-group-item-action active waves-effect">
+                                  <a href={void 0}>Voucher To Be Issued</a>
+                                </li>
+                                <li class="list-group-item justify-content-between">
+                                  {subscribe.vouchers.map((vitem, vindex) => {
+                                    var quantity_error =
+                                      vitem?.quantity_error || "";
+                                    var product_error =
+                                      vitem?.product_error || "";
+
+                                    return (
+                                      <div className="row g-3" key={vindex}>
+                                        <div
+                                          className={
+                                            product_error != ""
+                                              ? "col-md-9 error-select error"
+                                              : "col-md-9"
+                                          }
+                                        >
+                                          <div className="form-floating form-floating-outline custm-select-box mb-4">
+                                            <Select
+                                              value={vitem.product}
+                                              onChange={this.handleChangeVoucher.bind(
+                                                this,
+                                                item.toLowerCase(),
+                                                vindex,
+                                                "product"
+                                              )}
+                                              placeholder={"Select Voucher"}
+                                              options={this.props.voucherList}
+                                              isClearable={true}
+                                            />
+                                            {product_error != "" && (
+                                              <span className="error">
+                                                This field required
+                                              </span>
+                                            )}
+                                          </div>
+                                        </div>
+                                        <div
+                                          className={
+                                            quantity_error !== ""
+                                              ? "col-md-2 error-select error"
+                                              : "col-md-2"
+                                          }
+                                        >
+                                          <div className="form-floating form-floating-outline mb-4">
+                                            <input
+                                              type="text"
+                                              className="form-control"
+                                              name="infotext"
+                                              value={vitem.quantity}
+                                              onChange={this.handleChangeVoucher.bind(
+                                                this,
+                                                item.toLowerCase(),
+                                                vindex,
+                                                "quantity"
+                                              )}
+                                            />
+                                            <label htmlFor="alias_name">
+                                              Quantity
+                                            </label>
+                                            {quantity_error !== "" && (
+                                              <span className="error">
+                                                This field required
+                                              </span>
+                                            )}
+                                          </div>
+                                        </div>
+                                        <div className="col-md-1 mt-4">
+                                          <span
+                                            class="mdi mdi-plus"
+                                            onClick={this.addVoucher.bind(
+                                              this,
+                                              item.toLowerCase(),
+                                              vindex
+                                            )}
+                                          ></span>
+                                          {subscribe.vouchers.length > 1 && (
+                                            <span
+                                              class="mdi mdi-delete-outline"
+                                              onClick={this.removeVoucher.bind(
+                                                this,
+                                                item.toLowerCase(),
+                                                vindex
+                                              )}
+                                            ></span>
+                                          )}
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </li>
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
-            )}
+            </div>
           </div>
 
           <div

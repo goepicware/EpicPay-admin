@@ -3,15 +3,10 @@ import React from "react";
 import cookie from "react-cookies";
 import { format } from "date-fns";
 import noimage from "../../common/images/noimg-800x800.jpg";
-import {
-  deliveryId,
-  cateringId,
-  apiUrl,
-  masterheaderconfig,
-  clientheaderconfig,
-} from "./Config";
+import { apiUrl, masterheaderconfig, clientheaderconfig } from "./Config";
 import $ from "jquery";
 import Axios from "axios";
+import Swal from "sweetalert2";
 var qs = require("qs");
 var base64 = require("base-64");
 import Parser from "html-react-parser";
@@ -180,216 +175,13 @@ export const addressFormat = function (
   return unit !== "" ? Parser(unit.replace(/,\s*$/, "")) : "N/A";
 };
 
-/* delivery charge */
-export const getCalculatedAmount = function (
-  settingsArr,
-  zoneDetailsArr,
-  cartDetailsArr,
-  promoTionArr
-) {
-  var deliveryAmount = 0;
-  var additionalDelivery = 0;
-  var freeDeliveryAmnt = 0;
-  var orderDisplayGst = 0;
-  var orderGstAmount = 0;
-  var cartSubTotal = 0;
-  var promotionAmount = 0;
-  var grandTotalAmount = 0;
-  var MinimumAmnt = 0;
-
-  var promotionApplied = "";
-  var promotionTypeTxt = "";
-
-  if (Object.keys(settingsArr).length > 0) {
-    /*deliveryAmount = (settingsArr.client_delivery_surcharge !== '') ? parseFloat(settingsArr.client_delivery_surcharge) : 0;
-		additionalDelivery = (settingsArr.additional_delivery_charge !== '') ? parseFloat(settingsArr.additional_delivery_charge) : 0;
-		freeDeliveryAmnt = (settingsArr.client_free_delivery_amount !== '') ? parseFloat(settingsArr.client_free_delivery_amount) : 0;*/
-    orderDisplayGst =
-      settingsArr.client_tax_surcharge !== ""
-        ? parseFloat(settingsArr.client_tax_surcharge)
-        : 0;
-  }
-  if (Object.keys(zoneDetailsArr).length > 0) {
-    if (
-      settingsArr.zone_order_value_delivery_charge !== undefined &&
-      settingsArr.zone_order_value_delivery_charge === "1"
-    ) {
-      deliveryAmount =
-        cartDetailsArr.cart_zone_delivery_charge !== "" &&
-        typeof cartDetailsArr.cart_zone_delivery_charge !== undefined &&
-        typeof cartDetailsArr.cart_zone_delivery_charge !== "undefined"
-          ? parseFloat(cartDetailsArr.cart_zone_delivery_charge)
-          : 0;
-    } else {
-      deliveryAmount =
-        zoneDetailsArr[0].zone_delivery_charge !== ""
-          ? parseFloat(zoneDetailsArr[0].zone_delivery_charge)
-          : 0;
-    }
-
-    MinimumAmnt =
-      zoneDetailsArr[0].zone_min_amount !== ""
-        ? parseFloat(zoneDetailsArr[0].zone_min_amount)
-        : 0;
-
-    additionalDelivery =
-      zoneDetailsArr[0].zone_additional_delivery_charge !== ""
-        ? parseFloat(zoneDetailsArr[0].zone_additional_delivery_charge)
-        : 0;
-    freeDeliveryAmnt =
-      zoneDetailsArr[0].zone_free_delivery !== ""
-        ? parseFloat(zoneDetailsArr[0].zone_free_delivery)
-        : 0;
-  }
-
-  if (Object.keys(cartDetailsArr).length > 0) {
-    cartSubTotal = parseFloat(cartDetailsArr.cart_sub_total);
-  }
-
-  if (freeDeliveryAmnt > 0 && freeDeliveryAmnt <= cartSubTotal) {
-    deliveryAmount = 0;
-  }
-
-  if (promoTionArr["promotionApplied"] === "Yes") {
-    if (promoTionArr["promoIsDelivery"] === "Yes") {
-      deliveryAmount = 0;
-    } else {
-      promotionAmount = promoTionArr["promotionAmount"];
-    }
-  }
-
-  if (cookie.load("defaultAvilablityId") !== deliveryId) {
-    deliveryAmount = 0;
-    additionalDelivery = 0;
-    MinimumAmnt = 0;
-  }
-
-  grandTotalAmount =
-    cartSubTotal + deliveryAmount + additionalDelivery - promotionAmount;
-
-  if (orderDisplayGst > 0) {
-    orderGstAmount = (orderDisplayGst / 100) * grandTotalAmount;
-  }
-
-  grandTotalAmount = parseFloat(grandTotalAmount) + parseFloat(orderGstAmount);
-
-  var resultArr = [];
-  resultArr["deliveryCharge"] = deliveryAmount;
-  resultArr["additionalDelivery"] = additionalDelivery;
-  resultArr["freeDeliveryAmnt"] = freeDeliveryAmnt;
-  resultArr["minimumAmnt"] = MinimumAmnt;
-  resultArr["promotionApplied"] = promotionApplied;
-  resultArr["promotionTypeTxt"] = promotionTypeTxt;
-  resultArr["promotionAmount"] = promotionAmount;
-  resultArr["orderDisplayGst"] = orderDisplayGst;
-  resultArr["orderGstAmount"] = orderGstAmount.toFixed(2);
-  resultArr["cartSubTotalAmount"] = cartSubTotal.toFixed(2);
-  resultArr["grandTotalAmount"] = grandTotalAmount.toFixed(2);
-
-  return resultArr;
-};
-
-/* delivery charge */
-export const getCateringCalculatedAmount = function (
-  settingsArr,
-  zoneDetailsArr,
-  cartDetailsArr,
-  promoTionArr,
-  dynmaic_surcharge
-) {
-  var deliveryAmount = 0;
-  var additionalDelivery = 0;
-  var freeDeliveryAmnt = 0;
-  var orderDisplayGst = 0;
-  var orderGstAmount = 0;
-  var cartSubTotal = 0;
-  var promotionAmount = 0;
-  var grandTotalAmount = 0;
-
-  var promotionApplied = "";
-  var promotionTypeTxt = "";
-
-  if (Object.keys(settingsArr).length > 0) {
-    /*deliveryAmount = (settingsArr.client_delivery_surcharge !== '') ? parseFloat(settingsArr.client_delivery_surcharge) : 0;
-    additionalDelivery = (settingsArr.additional_delivery_charge !== '') ? parseFloat(settingsArr.additional_delivery_charge) : 0;
-    freeDeliveryAmnt = (settingsArr.client_free_delivery_amount !== '') ? parseFloat(settingsArr.client_free_delivery_amount) : 0;*/
-    orderDisplayGst =
-      settingsArr.client_tax_surcharge !== ""
-        ? parseFloat(settingsArr.client_tax_surcharge)
-        : 0;
-  }
-
-  if (zoneDetailsArr !== undefined && Object.keys(zoneDetailsArr).length > 0) {
-    deliveryAmount =
-      zoneDetailsArr[0].zone_delivery_charge !== ""
-        ? parseFloat(zoneDetailsArr[0].zone_delivery_charge)
-        : 0;
-    additionalDelivery =
-      zoneDetailsArr[0].zone_additional_delivery_charge !== ""
-        ? parseFloat(zoneDetailsArr[0].zone_additional_delivery_charge)
-        : 0;
-    freeDeliveryAmnt =
-      zoneDetailsArr[0].zone_free_delivery !== ""
-        ? parseFloat(zoneDetailsArr[0].zone_free_delivery)
-        : 0;
-  }
-
-  if (Object.keys(cartDetailsArr).length > 0) {
-    cartSubTotal = parseFloat(cartDetailsArr.cart_sub_total);
-  }
-
-  if (freeDeliveryAmnt > 0 && freeDeliveryAmnt <= cartSubTotal) {
-    deliveryAmount = 0;
-  }
-
-  if (promoTionArr["promotionApplied"] === "Yes") {
-    if (promoTionArr["promoIsDelivery"] === "Yes") {
-      deliveryAmount = 0;
-    } else {
-      promotionAmount = promoTionArr["promotionAmount"];
-    }
-  }
-
-  if (cookie.load("defaultAvilablityId") !== cateringId) {
-    deliveryAmount = 0;
-    additionalDelivery = 0;
-  }
-
-  grandTotalAmount =
-    cartSubTotal +
-    deliveryAmount +
-    additionalDelivery +
-    dynmaic_surcharge -
-    promotionAmount;
-
-  if (orderDisplayGst > 0) {
-    orderGstAmount = (orderDisplayGst / 100) * grandTotalAmount;
-  }
-
-  grandTotalAmount = parseFloat(grandTotalAmount) + parseFloat(orderGstAmount);
-
-  var resultArr = [];
-  resultArr["deliveryCharge"] = deliveryAmount;
-  resultArr["additionalDelivery"] = additionalDelivery;
-  resultArr["freeDeliveryAmnt"] = freeDeliveryAmnt;
-  resultArr["promotionApplied"] = promotionApplied;
-  resultArr["promotionTypeTxt"] = promotionTypeTxt;
-  resultArr["promotionAmount"] = promotionAmount;
-  resultArr["orderDisplayGst"] = orderDisplayGst;
-  resultArr["orderGstAmount"] = orderGstAmount.toFixed(2);
-  resultArr["cartSubTotalAmount"] = cartSubTotal.toFixed(2);
-  resultArr["grandTotalAmount"] = grandTotalAmount.toFixed(2);
-
-  return resultArr;
-};
-
 /* show Alert */
 export const showAlert = function (header, message, type, autoClose = "No") {
   if (autoClose === "No") {
     var icon = "";
     if (type === "success") {
       icon = "success";
-    } else if (type === "success") {
+    } else if (type === "warning") {
       icon = "warning";
     } else {
       icon = "error";
@@ -1075,4 +867,12 @@ export const isValidPrice = function (value) {
   return value !== "" && !regex.test(value)
     ? "This is not a valid price."
     : null;
+};
+
+export const showSorting = function (value) {
+  if (value === "ASC") {
+    return <span class="mdi mdi-sort-descending"></span>;
+  } else {
+    return <span class="mdi mdi-sort-ascending"></span>;
+  }
 };

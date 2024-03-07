@@ -1,36 +1,9 @@
 /* eslint-disable */
 import React, { Component } from "react";
-import cookie from "react-cookies";
-import axios from "axios";
 import { connect } from "react-redux";
-import update from "immutability-helper";
-
-import {
-  appId,
-  apiUrl,
-  deliveryId,
-  pickupId,
-  cateringId,
-  reservationId,
-} from "../../Helpers/Config";
-import {
-  GET_GLOBAL_SETTINGS,
-  GET_STATIC_BLOCK,
-  GET_NORMAL_POPUP,
-  GET_CATEGORY_LIST,
-  GET_MENU_NAVIGATION,
-} from "../../../actions";
-import {
-  showLoader,
-  hideLoader,
-  validateEmailFun,
-  showCustomAlert,
-} from "../../Helpers/SettingHelper";
 
 import Header from "../Layout/Header";
 import Topmenu from "../Layout/Topmenu";
-
-var Parser = require("html-react-parser");
 
 class Home extends Component {
   constructor(props) {
@@ -46,12 +19,11 @@ class Home extends Component {
         <div className="layout-container">
           <Header />
           <div className="layout-page">
-            
-           <Topmenu />
+            <Topmenu />
 
             <div className="content-wrapper">
               <div className="container-xxl flex-grow-1 container-p-y">
-                <h4 className="fw-bold">Goepicware wallet management</h4>
+                <h4 className="fw-bold">GoepicPay wallet management</h4>
 
                 <div className="card">
                   <h5 className="card-header">Overall wallet info</h5>

@@ -35,26 +35,14 @@ import Outletlist from "./components/Clientpanel/Outlet/List";
 import Outletform from "./components/Clientpanel/Outlet/Form";
 import Zonelist from "./components/Clientpanel/Zone/List";
 import Zoneform from "./components/Clientpanel/Zone/Zoneform";
-import Sitelocationlist from "./components/Clientpanel/Sitelocation/List";
-import Sitelocationform from "./components/Clientpanel/Sitelocation/Form";
-import Brandslist from "./components/Clientpanel/Brands/List";
-import Brandsform from "./components/Clientpanel/Brands/Form";
-import Menugrouplist from "./components/Clientpanel/Menugroup/List";
-import Menugroupform from "./components/Clientpanel/Menugroup/Form";
-import Menuitemlist from "./components/Clientpanel/Menuitem/List";
-import Menuitemform from "./components/Clientpanel/Menuitem/Form";
 import Pagelist from "./components/Clientpanel/Pages/List";
 import Pageform from "./components/Clientpanel/Pages/Form";
-import Staticblocklist from "./components/Clientpanel/Staticblock/List";
-import Staticblockform from "./components/Clientpanel/Staticblock/Form";
-import Bannerlist from "./components/Clientpanel/Banner/List";
-import Bannerform from "./components/Clientpanel/Banner/Form";
-import Faqcategorylist from "./components/Clientpanel/Faqcategory/List";
-import Faqcategoryform from "./components/Clientpanel/Faqcategory/Form";
-import Faqlist from "./components/Clientpanel/Faq/List";
-import Faqform from "./components/Clientpanel/Faq/Form";
-import Emailtemplatelist from "./components/Clientpanel/Emailtemplate/List";
-import Emailtemplateform from "./components/Clientpanel/Emailtemplate/Form";
+import Staticblocklist from "./components/Masterpanel/Staticblock/List";
+import Staticblockform from "./components/Masterpanel/Staticblock/Form";
+import Bannerlist from "./components/Masterpanel/Banner/List";
+import Bannerform from "./components/Masterpanel/Banner/Form";
+import Emailtemplatelist from "./components/Masterpanel/Emailtemplate/List";
+import Emailtemplateform from "./components/Masterpanel/Emailtemplate/Form";
 import Userroleslist from "./components/Clientpanel/Userroles/List";
 import Userrolesform from "./components/Clientpanel/Userroles/Form";
 import Userlist from "./components/Clientpanel/User/List";
@@ -72,21 +60,16 @@ import Subcategorylist from "./components/Clientpanel/Subcategory/List";
 import Subcategoryform from "./components/Clientpanel/Subcategory/Form";
 import Productslist from "./components/Clientpanel/Products/List";
 import Productsform from "./components/Clientpanel/Products/Form";
+import Subscriptionlist from "./components/Clientpanel/Subscription/List";
+import Subscriptionform from "./components/Clientpanel/Subscription/Form";
 import Crmsettingsform from "./components/Clientpanel/Crmsettings/Form";
 import Rewardsettingsform from "./components/Clientpanel/Rewardsettings/Form";
-import Missionform from "./components/Clientpanel/Mission/Form";
-import Pointssettingsform from "./components/Clientpanel/Pointssettings/Form";
-import Grouplist from "./components/Clientpanel/Group/List";
-import Groupform from "./components/Clientpanel/Group/Form";
-import Orderlist from "./components/Clientpanel/Orders/List";
-import OrderDetails from "./components/Clientpanel/Orders/Details";
-import Reportlist from "./components/Clientpanel/Reports/List";
+import Missionform from "./components/Masterpanel/Mission/Form";
+import Pointssettingsform from "./components/Masterpanel/Pointssettings/Form";
 import Timeslotlist from "./components/Clientpanel/Timeslot/List";
 import Timeslotform from "./components/Clientpanel/Timeslot/Form";
 import Tagslist from "./components/Clientpanel/Tags/List";
 import Tagsform from "./components/Clientpanel/Tags/Form";
-import Ownriderlist from "./components/Clientpanel/Ownrider/List";
-import Ownriderform from "./components/Clientpanel/Ownrider/Form";
 import Pointslist from "./components/Clientpanel/Points/List";
 import Pointsform from "./components/Clientpanel/Points/Form";
 import Settingsform from "./components/Clientpanel/Settings/Form";
@@ -155,50 +138,6 @@ root.render(
           path="/clientpanel/zone/edit/:EditID"
           component={Zoneform}
         />
-        <Route
-          exact
-          path="/clientpanel/sitelocation/"
-          component={Sitelocationlist}
-        />
-        <Route
-          exact
-          path="/clientpanel/sitelocation/add"
-          component={Sitelocationform}
-        />
-        <Route
-          exact
-          path="/clientpanel/sitelocation/edit/:EditID"
-          component={Sitelocationform}
-        />
-        <Route exact path="/clientpanel/brand/" component={Brandslist} />
-        <Route exact path="/clientpanel/brand/add" component={Brandsform} />
-        <Route
-          exact
-          path="/clientpanel/brand/edit/:EditID"
-          component={Brandsform}
-        />
-        <Route exact path="/clientpanel/menugroup/" component={Menugrouplist} />
-        <Route
-          exact
-          path="/clientpanel/menugroup/add"
-          component={Menugroupform}
-        />
-        <Route
-          exact
-          path="/clientpanel/menugroup/edit/:EditID"
-          component={Menugroupform}
-        />
-        <Route exact path="/clientpanel/menuitem/" component={Menuitemlist} />
-        <Route
-          exact
-          path="/clientpanel/menuitem/add"
-          component={Menuitemform}
-        />
-        <Route
-          exact
-          path="/clientpanel/menuitem/edit/:EditID"
-          component={Menuitemform}
-        />
         <Route exact path="/clientpanel/pages/" component={Pagelist} />
         <Route exact path="/clientpanel/pages/add" component={Pageform} />
         <Route
@@ -208,57 +147,39 @@ root.render(
         />
         <Route
           exact
-          path="/clientpanel/staticblock/"
+          path="/masterpanel/staticblock/"
           component={Staticblocklist}
         />
         <Route
           exact
-          path="/clientpanel/staticblock/add"
+          path="/masterpanel/staticblock/add"
           component={Staticblockform}
         />
         <Route
           exact
-          path="/clientpanel/staticblock/edit/:EditID"
+          path="/masterpanel/staticblock/edit/:EditID"
           component={Staticblockform}
         />
-        <Route exact path="/clientpanel/banner/" component={Bannerlist} />
-        <Route exact path="/clientpanel/banner/add" component={Bannerform} />
+        <Route exact path="/masterpanel/banner/" component={Bannerlist} />
+        <Route exact path="/masterpanel/banner/add" component={Bannerform} />
         <Route
           exact
-          path="/clientpanel/banner/edit/:EditID"
+          path="/masterpanel/banner/edit/:EditID"
           component={Bannerform}
         />
         <Route
           exact
-          path="/clientpanel/faqcategory/"
-          component={Faqcategorylist}
-        />
-        <Route
-          exact
-          path="/clientpanel/faqcategory/add"
-          component={Faqcategoryform}
-        />
-        <Route
-          exact
-          path="/clientpanel/faqcategory/edit/:EditID"
-          component={Faqcategoryform}
-        />
-        <Route exact path="/clientpanel/faq/" component={Faqlist} />
-        <Route exact path="/clientpanel/faq/add" component={Faqform} />
-        <Route exact path="/clientpanel/faq/edit/:EditID" component={Faqform} />
-        <Route
-          exact
-          path="/clientpanel/emailtemplate/"
+          path="/masterpanel/emailtemplate/"
           component={Emailtemplatelist}
         />
         <Route
           exact
-          path="/clientpanel/emailtemplate/add"
+          path="/masterpanel/emailtemplate/add"
           component={Emailtemplateform}
         />
         <Route
           exact
-          path="/clientpanel/emailtemplate/edit/:EditID"
+          path="/masterpanel/emailtemplate/edit/:EditID"
           component={Emailtemplateform}
         />
         <Route exact path="/clientpanel/userroles/" component={Userroleslist} />
@@ -329,10 +250,10 @@ root.render(
           path="/clientpanel/rewardsettings/"
           component={Rewardsettingsform}
         />
-        <Route exact path="/clientpanel/mission/" component={Missionform} />
+        <Route exact path="/masterpanel/mission/" component={Missionform} />
         <Route
           exact
-          path="/clientpanel/pointssettings/"
+          path="/masterpanel/pointssettings/"
           component={Pointssettingsform}
         />
         <Route exact path="/clientpanel/customers/" component={Customerlist} />
@@ -391,36 +312,20 @@ root.render(
           path="/clientpanel/catalog-products/edit/:EditID"
           component={Productsform}
         />
-        <Route exact path="/clientpanel/catalog-group/" component={Grouplist} />
         <Route
           exact
-          path="/clientpanel/catalog-group/add"
-          component={Groupform}
+          path="/clientpanel/subscription/"
+          component={Subscriptionlist}
         />
         <Route
           exact
-          path="/clientpanel/catalog-group/edit/:EditID"
-          component={Groupform}
+          path="/clientpanel/subscription/add"
+          component={Subscriptionform}
         />
         <Route
           exact
-          path="/clientpanel/order/:orderType/:orderID"
-          component={OrderDetails}
-        />
-        <Route
-          exact
-          path="/clientpanel/order/:orderType/"
-          component={Orderlist}
-        />
-        <Route
-          exact
-          path="/clientpanel/order-reports/"
-          component={Reportlist}
-        />
-        <Route
-          exact
-          path="/clientpanel/order/:orderType/"
-          component={Orderlist}
+          path="/clientpanel/subscription/edit/:EditID"
+          component={Subscriptionform}
         />
         <Route exact path="/clientpanel/timeslot/" component={Timeslotlist} />
         <Route
@@ -439,17 +344,6 @@ root.render(
           exact
           path="/clientpanel/catalog-tag/edit/:EditID"
           component={Tagsform}
-        />
-        <Route exact path="/clientpanel/own-rider/" component={Ownriderlist} />
-        <Route
-          exact
-          path="/clientpanel/own-rider/add"
-          component={Ownriderform}
-        />
-        <Route
-          exact
-          path="/clientpanel/own-rider/edit/:EditID"
-          component={Ownriderform}
         />
         <Route exact path="/clientpanel/points/" component={Pointslist} />
         <Route exact path="/clientpanel/points/:Type" component={Pointsform} />

@@ -1,7 +1,6 @@
 /* eslint-disable */
 import React, { Component } from "react";
-import { connect } from "react-redux";
-
+import { Link } from "react-router-dom";
 import { checkMasterAuth } from "../../Helpers/SettingHelper";
 class Header extends Component {
   constructor(props) {
@@ -15,6 +14,7 @@ class Header extends Component {
     script.async = true;
     document.body.appendChild(script);
   }
+
   render() {
     var currentPage = this.props.currentPage;
     return (
@@ -23,16 +23,13 @@ class Header extends Component {
         className="layout-menu menu-vertical menu bg-menu-theme"
       >
         <div className="app-brand demo">
-          <a href="index.html" className="app-brand-link">
+          <Link to={"/masterpanel/client"} className="app-brand-link">
             <span className="app-brand-logo demo">
               <span>
-                <img src={"/logo.png"} alt="Goepicware" />
+                <img src={"/epicpay.png"} alt="GoepicPay" />
               </span>
             </span>
-            <span className="app-brand-text demo menu-text fw-bold ms-2">
-              Goepicware
-            </span>
-          </a>
+          </Link>
 
           <a
             href={void 0}
@@ -68,25 +65,107 @@ class Header extends Component {
               <div>Dashboard</div>
             </a>
           </li>
-          <li className={
-                  currentPage === "client"
-                    ? "menu-item active"
-                    : "menu-item"
-                } >
-            <a href="/masterpanel/client" className={"menu-link"}>
+          <li
+            className={
+              currentPage === "client" ? "menu-item active" : "menu-item"
+            }
+          >
+            <Link to="/masterpanel/client" className="menu-link">
               <i className="menu-icon tf-icons mdi mdi-vector-arrange-below"></i>
               <div>Client</div>
-            </a>
+            </Link>
           </li>
-          <li className={
-                  currentPage === "companycategory"
-                    ? "menu-item active"
-                    : "menu-item"
-                }>
-            <a href="/masterpanel/category" className={"menu-link"}>
+          <li
+            className={
+              currentPage === "companycategory"
+                ? "menu-item active"
+                : "menu-item"
+            }
+          >
+            <Link to="/masterpanel/category" className="menu-link">
               <i className="menu-icon tf-icons mdi mdi-vector-arrange-below"></i>
               <div>Company Category</div>
+            </Link>
+          </li>
+          <li
+            className={
+              ["mission", "pointssettings"].indexOf(currentPage) >= 0
+                ? "menu-item open"
+                : "menu-item"
+            }
+          >
+            <a href={void 0} className="menu-link menu-toggle">
+              <i className="menu-icon tf-icons mdi mdi-bullhorn-outline"></i>
+              <div>Rewards</div>
             </a>
+            <ul className="menu-sub">
+              <li
+                className={
+                  currentPage === "mission" ? "menu-item active" : "menu-item"
+                }
+              >
+                <Link to="/masterpanel/mission" className="menu-link">
+                  <div>Mission</div>
+                </Link>
+              </li>
+              <li
+                className={
+                  currentPage === "pointssettings"
+                    ? "menu-item active"
+                    : "menu-item"
+                }
+              >
+                <Link to="/masterpanel/pointssettings" className="menu-link">
+                  <div>Points Settings</div>
+                </Link>
+              </li>
+            </ul>
+          </li>
+          <li
+            className={
+              ["emailtemplate", "banner", "staticblock"].indexOf(currentPage) >=
+              0
+                ? "menu-item open"
+                : "menu-item"
+            }
+          >
+            <a href={void 0} className="menu-link menu-toggle">
+              <i className="menu-icon tf-icons mdi mdi-star-outline"></i>
+              <div>CMS</div>
+            </a>
+            <ul className="menu-sub">
+              <li
+                className={
+                  currentPage === "staticblock"
+                    ? "menu-item active"
+                    : "menu-item"
+                }
+              >
+                <Link to="/masterpanel/staticblock" className="menu-link">
+                  <div>Static Block</div>
+                </Link>
+              </li>
+              <li
+                className={
+                  currentPage === "banner" ? "menu-item active" : "menu-item"
+                }
+              >
+                <Link to="/masterpanel/banner" className="menu-link">
+                  <div>Banner</div>
+                </Link>
+              </li>
+              <li
+                className={
+                  currentPage === "emailtemplate"
+                    ? "menu-item active"
+                    : "menu-item"
+                }
+              >
+                <Link to="/masterpanel/emailtemplate" className="menu-link">
+                  <div>Email Template</div>
+                </Link>
+              </li>
+            </ul>
           </li>
         </ul>
       </aside>
@@ -94,12 +173,4 @@ class Header extends Component {
   }
 }
 
-const mapStateTopProps = (state) => {
-  return {};
-};
-
-const mapDispatchToProps = (dispatch) => {
-  return {};
-};
-
-export default connect(mapStateTopProps, mapDispatchToProps)(Header);
+export default Header;

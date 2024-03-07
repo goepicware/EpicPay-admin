@@ -251,6 +251,7 @@ class List extends Component {
                         <tr>
                           <th>Name</th>
                           <th>User Name</th>
+                          <th>Referral Code</th>
                           <th>Email</th>
                           <th>Outlet</th>
                           <th>Status</th>
@@ -279,6 +280,7 @@ class List extends Component {
                                   <strong>{item.company_user_fname}</strong>
                                 </td>
                                 <td>{item.company_username}</td>
+                                <td>{item.company_user_referral_code}</td>
                                 <td>{item.company_user_email_address}</td>
                                 <td>
                                   {item.outlet_name !== null

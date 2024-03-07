@@ -26,11 +26,8 @@ class Header extends Component {
           <Link to={"/clientpanel/dashboard"} className="app-brand-link">
             <span className="app-brand-logo demo">
               <span>
-                <img src={"/logo.png"} alt="Goepicware" />
+                <img src={"/epicpay.png"} alt="EpicPay" />
               </span>
-            </span>
-            <span className="app-brand-text demo menu-text fw-bold ms-2">
-              Goepicware
             </span>
           </Link>
 
@@ -71,47 +68,14 @@ class Header extends Component {
           <li
             className={
               [
-                "wallettopupplans",
-                "wallettopuphistory",
+                "sitelocation",
+                "brand",
+                "outlet",
+                "zone",
+                "users",
+                "timeslot",
+                "referral",
               ].indexOf(currentPage) >= 0
-                ? "menu-item open"
-                : "menu-item"
-            }
-          >
-            <a href={void 0} className="menu-link menu-toggle">
-              <i className="menu-icon tf-icons mdi mdi-wallet-plus-outline"></i>
-              <div>Wallet Topup</div>
-            </a>
-            <ul className="menu-sub">
-              <li
-                className={
-                  currentPage === "wallettopupplans"
-                    ? "menu-item active"
-                    : "menu-item"
-                }
-              >
-                <Link to="/clientpanel/wallettopupplan" className="menu-link">
-                  <div>Topup Plans</div>
-                </Link>
-              </li>
-              <li
-                className={
-                  currentPage === "wallettopuphistory"
-                    ? "menu-item active"
-                    : "menu-item"
-                }
-              >
-                <Link to="/clientpanel/wallettopuphistory" className="menu-link">
-                  <div>Topup  History</div>
-                </Link>
-              </li>
-            </ul>
-          </li>
-          <li
-            className={
-              ["sitelocation", "brand", "outlet", "zone", "users", "timeslot"].indexOf(
-                currentPage
-              ) >= 0
                 ? "menu-item open"
                 : "menu-item"
             }
@@ -148,86 +112,104 @@ class Header extends Component {
                   <div>Users</div>
                 </Link>
               </li>
+              <li
+                className={
+                  currentPage === "referral" ? "menu-item active" : "menu-item"
+                }
+              >
+                <Link to="/clientpanel/referral" className="menu-link">
+                  <div>Referral</div>
+                </Link>
+              </li>
             </ul>
           </li>
           <li
             className={
+              ["wallettopupplans", "wallettopuphistory"].indexOf(currentPage) >=
+              0
+                ? "menu-item open"
+                : "menu-item"
+            }
+          >
+            <a href={void 0} className="menu-link menu-toggle">
+              <i className="menu-icon tf-icons mdi mdi-wallet-plus-outline"></i>
+              <div>Credits Wallet</div>
+            </a>
+            <ul className="menu-sub">
+              <li
+                className={
+                  currentPage === "wallettopupplans"
+                    ? "menu-item active"
+                    : "menu-item"
+                }
+              >
+                <Link to="/clientpanel/wallettopupplan" className="menu-link">
+                  <div>Credit Setup</div>
+                </Link>
+              </li>
+              <li
+                className={
+                  currentPage === "wallettopuphistory"
+                    ? "menu-item active"
+                    : "menu-item"
+                }
+              >
+                <Link
+                  to="/clientpanel/wallettopuphistory"
+                  className="menu-link"
+                >
+                  <div>Credit History</div>
+                </Link>
+              </li>
+            </ul>
+          </li>
+          <li
+            className={
+              ["catalog-products"].indexOf(currentPage) >= 0
+                ? "menu-item active"
+                : "menu-item"
+            }
+          >
+            <Link to="/clientpanel/catalog-products" className="menu-link">
+              <span className="menu-icon mdi mdi-ticket-percent-outline"></span>
+              <div>Vouchers</div>
+            </Link>
+          </li>
+          <li
+            className={
+              ["subscription"].indexOf(currentPage) >= 0
+                ? "menu-item active"
+                : "menu-item"
+            }
+          >
+            <Link to="/clientpanel/subscription" className="menu-link">
+              <span className="menu-icon mdi mdi-alpha-s-circle-outline"></span>
+              <div>Subscription</div>
+            </Link>
+          </li>
+          <li
+            className={
               [
-                "emailtemplate",
-                "faq",
-                "faqcategory",
-                "banner",
-                "staticblock",
-                "pages",
+                "promotions",
+                "crmsettings",
+                "rewardsettings",
+                "mission",
+                "pointssettings",
               ].indexOf(currentPage) >= 0
                 ? "menu-item open"
                 : "menu-item"
             }
           >
             <a href={void 0} className="menu-link menu-toggle">
-              <i className="menu-icon tf-icons mdi mdi-star-outline"></i>
-              <div>CMS</div>
-            </a>
-            <ul className="menu-sub">
-              {/*<li
-                className={
-                  currentPage === "pages" ? "menu-item active" : "menu-item"
-                }
-              >
-                <Link to="/clientpanel/pages" className="menu-link">
-                  <div>Pages</div>
-                </Link>
-              </li>*/}
-              <li
-                className={
-                  currentPage === "staticblock"
-                    ? "menu-item active"
-                    : "menu-item"
-                }
-              >
-                <Link to="/clientpanel/staticblock" className="menu-link">
-                  <div>Static Block</div>
-                </Link>
-              </li>
-              <li
-                className={
-                  currentPage === "banner" ? "menu-item active" : "menu-item"
-                }
-              >
-                <Link to="/clientpanel/banner" className="menu-link">
-                  <div>Banner</div>
-                </Link>
-              </li>
-              <li
-                className={
-                  currentPage === "emailtemplate"
-                    ? "menu-item active"
-                    : "menu-item"
-                }
-              >
-                <Link to="/clientpanel/emailtemplate" className="menu-link">
-                  <div>Email Template</div>
-                </Link>
-              </li>
-            </ul>
-          </li>
-          <li
-            className={
-              ["promotions", "crmsettings", "rewardsettings", "mission", "pointssettings"].indexOf(
-                currentPage
-              ) >= 0
-                ? "menu-item open"
-                : "menu-item"
-            }
-          >
-            <a href={void 0} className="menu-link menu-toggle">
               <i className="menu-icon tf-icons mdi mdi-bullhorn-outline"></i>
-              <div>Promotions</div>
+              <div>Rewards</div>
             </a>
             <ul className="menu-sub">
               <li
                 className={
-                  currentPage === "promotions" ? "menu-item active" : "menu-item"
+                  currentPage === "promotions"
+                    ? "menu-item active"
+                    : "menu-item"
                 }
               >
                 <Link to="/clientpanel/promotions" className="menu-link">
@@ -236,7 +218,9 @@ class Header extends Component {
               </li>
               <li
                 className={
-                  currentPage === "crmsettings" ? "menu-item active" : "menu-item"
+                  currentPage === "crmsettings"
+                    ? "menu-item active"
+                    : "menu-item"
                 }
               >
                 <Link to="/clientpanel/crmsettings" className="menu-link">
@@ -245,60 +229,13 @@ class Header extends Component {
               </li>
               <li
                 className={
-                  currentPage === "rewardsettings" ? "menu-item active" : "menu-item"
-                }
-              >
-                <Link to="/clientpanel/rewardsettings" className="menu-link">
-                  <div>Reward Settings</div>
-                </Link>
-              </li>
-              <li
-                className={
-                  currentPage === "mission" ? "menu-item active" : "menu-item"
-                }
-              >
-                <Link to="/clientpanel/mission" className="menu-link">
-                  <div>Mission</div>
-                </Link>
-              </li>
-              <li
-                className={
-                  currentPage === "pointssettings" ? "menu-item active" : "menu-item"
-                }
-              >
-                <Link to="/clientpanel/pointssettings" className="menu-link">
-                  <div>Points Settings</div>
-                </Link>
-              </li>
-            </ul>
-          </li>
-          <li
-            className={
-              [
-                "catalog-tag",
-                "catalog-products",
-                "catalog-subcategories",
-                "catalog-categories",
-                "catalog-group",
-              ].indexOf(currentPage) >= 0
-                ? "menu-item open"
-                : "menu-item"
-            }
-          >
-            <a href={void 0} className="menu-link menu-toggle">
-              <i className="menu-icon tf-icons mdi mdi-alpha-p-circle-outline"></i>
-              <div>Catalogs</div>
-            </a>
-            <ul className="menu-sub">
-              <li
-                className={
-                  currentPage === "catalog-products"
+                  currentPage === "rewardsettings"
                     ? "menu-item active"
                     : "menu-item"
                 }
               >
-                <Link to="/clientpanel/catalog-products" className="menu-link">
-                  <div>Products</div>
+                <Link to="/clientpanel/rewardsettings" className="menu-link">
+                  <div>Reward Settings</div>
                 </Link>
               </li>
             </ul>

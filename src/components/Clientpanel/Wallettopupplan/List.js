@@ -11,13 +11,14 @@ import {
   showStatus,
   encodeValue,
   removeItem,
+  showSorting,
 } from "../../Helpers/SettingHelper";
 import Header from "../Layout/Header";
 import Topmenu from "../Layout/Topmenu";
 import Footer from "../Layout/Footer";
 import Pagenation from "../Layout/Pagenation";
 var module = "clientpanel/wallettopupplan/";
-var moduleName = "Wallettopupplans";
+var moduleName = "Credit Setup";
 class List extends Component {
   constructor(props) {
     super(props);
@@ -34,6 +35,8 @@ class List extends Component {
       status: "",
       storeID: "",
       outletList: [],
+      sortField: "topupplan_display_name",
+      sortType: "ASC",
     };
     this.handleChangeText = this.handleChangeText.bind(this);
   }
@@ -124,11 +127,33 @@ class List extends Component {
         offset +
         "&company_id=" +
         this.state.companyID +
-        addParams,
+        addParams +
+        "&sortField=" +
+        this.state.sortField +
+        "&sortType=" +
+        this.state.sortType,
       url: apiUrl + module + "list",
       authType: "client",
     };
     this.props.getListData(params);
+  }
+  sortItem(sortField) {
+    var sortType = "";
+    if (sortField === this.state.sortField) {
+      if (this.state.sortType == "ASC") {
+        sortType = "DESC";
+      } else {
+        sortType = "ASC";
+      }
+    } else {
+      sortType = "ASC";
+    }
+    this.setState(
+      { sortField: sortField, sortType: sortType, loading: true },
+      function () {
+        this.loadList(1);
+      }
+    );
   }
   resetSearch() {
     this.setState(
@@ -235,10 +260,40 @@ class List extends Component {
                     <table className="table">
                       <thead>
                         <tr>
-                          <th>Plan Title</th>
+                          <th
+                            onClick={this.sortItem.bind(
+                              this,
+                              "topupplan_display_name"
+                            )}
+                          >
+                            Plan Title &nbsp;
+                            {this.state.sortField === "topupplan_display_name"
+                              ? showSorting(this.state.sortType)
+                              : showSorting("ASC")}
+                          </th>
                           <th>Outlet</th>
-                          <th>credits</th>
-                          <th>bonus</th>
+                          <th
+                            onClick={this.sortItem.bind(
+                              this,
+                              "topupplan_display_name"
+                            )}
+                          >
+                            credits &nbsp;
+                            {this.state.sortField === "topupplan_credits_amount"
+                              ? showSorting(this.state.sortType)
+                              : showSorting("ASC")}
+                          </th>
+                          <th
+                            onClick={this.sortItem.bind(
+                              this,
+                              "topupplan_bonus_amount"
+                            )}
+                          >
+                            bonus &nbsp;
+                            {this.state.sortField === "topupplan_bonus_amount"
+                              ? showSorting(this.state.sortType)
+                              : showSorting("ASC")}
+                          </th>
                           <th>Start Date</th>
                           <th>End Date</th>
                           <td>Status</td>

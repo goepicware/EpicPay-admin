@@ -6,11 +6,7 @@ class Logout extends Component {
   constructor(props) {
     super(props);
     var LoginType =
-      this.props.match.params !== "" &&
-      typeof this.props.match.params !== undefined &&
-      typeof this.props.match.params !== "undefined"
-        ? this.props.match.params.LoginType
-        : "";
+      this.props.match?.params !== "" ? this.props.match.params.LoginType : "";
     this.state = {
       loginType: LoginType,
     };

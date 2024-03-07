@@ -83,17 +83,14 @@ class Login extends Component {
                 <a href="index.html" className="app-brand-link gap-2">
                   <span className="app-brand-logo demo">
                     <span>
-                      <img src={"/logo.png"} alt="Goepicware" />
+                      <img src={"/epicpay.png"} alt="GoepicPay" />
                     </span>
-                  </span>
-                  <span className="app-brand-text demo text-heading fw-bold">
-                    Goepicware
                   </span>
                 </a>
               </div>
 
               <div className="card-body mt-2">
-                <h4 className="mb-2 fw-semibold">Welcome to Goepicware! 👋</h4>
+                <h4 className="mb-2 fw-semibold">Welcome to GoepicPay! 👋</h4>
                 <p className="mb-4">
                   Please sign-in to your account and start the adventure
                 </p>
@@ -149,12 +146,12 @@ function validationConfig(props) {
 class Form extends Component {
   constructor(props) {
     super(props);
-    this.state = {pass_input_type: "password"};
+    this.state = { pass_input_type: "password" };
   }
 
   changePassInputtype() {
     let passIntTyp = this.state.pass_input_type;
-        passIntTyp = (passIntTyp == 'password') ? 'text' : 'password';
+    passIntTyp = passIntTyp == "password" ? "text" : "password";
     this.setState({ pass_input_type: passIntTyp });
   }
 
@@ -246,7 +243,11 @@ class Form extends Component {
                 style={{ height: "49px" }}
                 onClick={this.changePassInputtype.bind(this)}
               >
-                {(this.state.pass_input_type == 'password')?<i className="mdi mdi-eye-off-outline"></i>:<i className="mdi mdi-eye-outline"></i>}
+                {this.state.pass_input_type == "password" ? (
+                  <i className="mdi mdi-eye-off-outline"></i>
+                ) : (
+                  <i className="mdi mdi-eye-outline"></i>
+                )}
               </span>
             </div>
           </div>

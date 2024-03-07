@@ -233,7 +233,7 @@ class List extends Component {
                       />
                     </div>
                   </div>
-                  <div className="col-md-3 mt-2">
+                  <div className="col-md-4 mt-2">
                     <button
                       type="button"
                       className="btn btn-primary me-sm-3 me-1 waves-effect waves-light"
@@ -243,18 +243,14 @@ class List extends Component {
                     </button>
                     <button
                       type="reset"
-                      className="btn btn-label-secondary waves-effect"
+                      className="btn btn-label-secondary waves-effect me-sm-3 me-1"
                       onClick={this.resetSearch.bind(this)}
                     >
                       Reset
                     </button>
                     {this.state.listdata.length > 0 &&
                       this.state.exportUrl !== "" && (
-                        <a
-                          href={this.state.exportUrl}
-                          target="_blank"
-                          style={{ marginLeft: "4px" }}
-                        >
+                        <a href={this.state.exportUrl} target="_blank">
                           <button
                             type="button"
                             className="btn btn-info waves-effect waves-light"

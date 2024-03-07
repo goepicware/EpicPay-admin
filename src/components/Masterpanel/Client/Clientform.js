@@ -10,7 +10,13 @@ import { validated } from "react-custom-validation";
 import validator from "validator";
 import { format } from "date-fns";
 import { GET_FORMPOST, GET_DETAILDATA } from "../../../actions";
-import { apiUrl, masterheaderconfig, awsCredentials, bucketName, foldername } from "../../Helpers/Config";
+import {
+  apiUrl,
+  masterheaderconfig,
+  awsCredentials,
+  bucketName,
+  foldername,
+} from "../../Helpers/Config";
 import {
   showLoader,
   hideLoader,
@@ -54,7 +60,9 @@ class Clientform extends Component {
         company_time_format: [],
         company_logo: "",
         company_status: "",
+        company_merchants_type: { label: "Complete", value: "1" },
         enable_menu: false,
+        enable_subscription: false,
         enable_tat: false,
         enable_zone: false,
         enable_zone_value_base_delivery_charge: false,
@@ -157,23 +165,27 @@ class Clientform extends Component {
             },
           }); */
 
-          var company_status_txt = 'Inactive';
-          if(result.company_status == "A") {
-              company_status_txt = 'Active';
-          } else if(result.company_status == "I") {
-              company_status_txt = 'Inactive';
-          } else if(result.company_status == "D") {  
-              company_status_txt = 'Deleted';
+          var company_status_txt = "Inactive";
+          if (result.company_status == "A") {
+            company_status_txt = "Active";
+          } else if (result.company_status == "I") {
+            company_status_txt = "Inactive";
+          } else if (result.company_status == "D") {
+            company_status_txt = "Deleted";
           }
           var status =
-            result.company_status !== "" &&
-            result.company_status !== null
+            result.company_status !== "" && result.company_status !== null
               ? {
                   label: company_status_txt,
                   value: result.company_status,
                 }
-              : [];
-
+              : "";
+          var companymerchantstype = { label: "Complete", value: "1" };
+          if (result.company_merchants_type == "1") {
+            companymerchantstype = { label: "Complete", value: "1" };
+          } else if (result.company_merchants_type == "2") {
+            companymerchantstype = { label: "Voucher Only", value: "2" };
+          }
           var clientupdatedata = {
             company_name: result.company_name,
             company_username: result.company_username,
@@ -197,7 +209,11 @@ class Clientform extends Component {
             company_zoom: result.company_zoom,
             company_amount: result.company_amount,
             company_status: status,
-            company_logo: result.company_logo !== "" && result.company_logo !== null ? result.company_logo : "",
+            company_merchants_type: companymerchantstype,
+            company_logo:
+              result.company_logo !== "" && result.company_logo !== null
+                ? result.company_logo
+                : "",
             company_date_format:
               result.company_date_format !== "" &&
               result.company_date_format !== null
@@ -221,6 +237,8 @@ class Clientform extends Component {
               typeof result.enable_menu !== "undefined"
                 ? true
                 : false,
+            enable_subscription: result?.enable_subscription,
+
             enable_tat:
               result.enable_tat == "1" &&
               result.enable_tat !== "" &&
@@ -385,10 +403,10 @@ class Clientform extends Component {
                 ? result.sms_live_account_sid
                 : "",
             sms_live_auth_token:
-              result.enable_menu == "1" &&
-              result.enable_menu !== "" &&
-              typeof result.enable_menu !== undefined &&
-              typeof result.enable_menu !== "undefined"
+              result.sms_live_auth_token == "1" &&
+              result.sms_live_auth_token !== "" &&
+              typeof result.sms_live_auth_token !== undefined &&
+              typeof result.sms_live_auth_token !== "undefined"
                 ? true
                 : false,
             sms_live_from_number:
@@ -455,7 +473,6 @@ class Clientform extends Component {
     }
   }
 
-  
   companycategoryList() {
     var urlShringTxt = apiUrl + "company/companycategory/categoryselectlist";
 
@@ -551,24 +568,29 @@ class Clientform extends Component {
     showLoader("submit_frm", "class");
     var client_data = this.state.clientdata;
 
-    let cate_idtxt = '';
+    let cate_idtxt = "";
     let categorylistvl = client_data.category_list;
-    if((categorylistvl != undefined) && (Object.keys(categorylistvl).length > 0)) {
+    if (categorylistvl != undefined && Object.keys(categorylistvl).length > 0) {
       categorylistvl.map((valuetxt, index) => {
-        cate_idtxt = (index == 0) ? valuetxt.value : cate_idtxt+'~'+valuetxt.value;
+        cate_idtxt =
+          index == 0 ? valuetxt.value : cate_idtxt + "~" + valuetxt.value;
       });
     }
-    client_data["category_list"] = cate_idtxt;  
+    client_data["category_list"] = cate_idtxt;
     client_data["company_country"] =
       Object.keys(client_data.company_country).length > 0
         ? client_data.company_country.value
         : "";
 
-     client_data["company_status"] =
-        Object.keys(client_data.company_status).length > 0
-          ? client_data.company_status.value : "I";  
-
-     client_data["company_currency"] =
+    client_data["company_status"] =
+      Object.keys(client_data.company_status).length > 0
+        ? client_data.company_status.value
+        : "I";
+    client_data["company_merchants_type"] =
+      Object.keys(client_data.company_merchants_type).length > 0
+        ? client_data.company_merchants_type.value
+        : "1";
+    client_data["company_currency"] =
       Object.keys(client_data.company_currency).length > 0
         ? client_data.company_currency.value
         : "";
@@ -592,7 +614,7 @@ class Clientform extends Component {
     client_data["company_availability_name"] =
       client_data.company_availability_name.length > 0
         ? client_data.company_availability_name.join(",")
-        : "";  
+        : "";
     client_data["loginID"] = userID();
     var post_url = "company/companycontroller/add";
     if (client_data.action === "edit" && this.state.editID !== "") {
@@ -710,6 +732,7 @@ function validationConfig(props) {
     company_email_address,
     company_amount,
     company_status,
+    company_merchants_type,
   } = props.fields;
   if (props.fields.action === "add") {
     return {
@@ -721,6 +744,7 @@ function validationConfig(props) {
         "company_email_address",
         "company_amount",
         "company_status",
+        "company_merchants_type",
       ],
 
       validations: {
@@ -743,6 +767,7 @@ function validationConfig(props) {
         ],
         company_amount: [[isEmpty, company_amount]],
         company_status: [[isSingleSelect, company_status]],
+        company_merchants_type: [[isSingleSelect, company_merchants_type]],
       },
     };
   } else {
@@ -755,6 +780,7 @@ function validationConfig(props) {
         "company_email_address",
         "company_amount",
         "company_status",
+        "company_merchants_type",
       ],
 
       validations: {
@@ -771,6 +797,7 @@ function validationConfig(props) {
         ],
         company_amount: [[isEmpty, company_amount]],
         company_status: [[isSingleSelect, company_status]],
+        company_merchants_type: [[isSingleSelect, company_merchants_type]],
       },
     };
   }
@@ -840,7 +867,8 @@ class Form extends Component {
       errMsgConfirmPassword,
       errMssEmail,
       errMsgStatus,
-      errMssAmount = "";
+      errMssAmount,
+      errMsgMerType = "";
     if ($validation.company_name.error.reason !== undefined) {
       errMsgName = $validation.company_name.show && (
         <span className="error">{$validation.company_name.error.reason}</span>
@@ -884,6 +912,13 @@ class Form extends Component {
     if ($validation.company_status.error.reason !== undefined) {
       errMsgStatus = $validation.company_status.show && (
         <span className="error">{$validation.company_status.error.reason}</span>
+      );
+    }
+    if ($validation.company_merchants_type.error.reason !== undefined) {
+      errMsgMerType = $validation.company_merchants_type.show && (
+        <span className="error">
+          {$validation.compancompany_merchants_typey_status.error.reason}
+        </span>
       );
     }
 
@@ -1219,6 +1254,63 @@ class Form extends Component {
                     </div>
                   </div>
 
+                  <div
+                    className={
+                      errMsgMerType !== "" &&
+                      errMsgMerType !== false &&
+                      errMsgMerType !== undefined
+                        ? "col-md-6 error-select error"
+                        : "col-md-6"
+                    }
+                  >
+                    <div className="form-floating form-floating-outline custm-select-box">
+                      <Select
+                        value={fields.company_merchants_type}
+                        onChange={this.handleSelectChange.bind(
+                          this,
+                          "company_merchants_type"
+                        )}
+                        placeholder="Select Merchants Type"
+                        options={[
+                          { value: "2", label: "Voucher Only" },
+                          { value: "1", label: "Complete " },
+                        ]}
+                      />
+                      <label className="select-box-label">
+                        Merchants Type<span className="error">*</span>
+                      </label>
+                      {errMsgMerType}
+                    </div>
+                  </div>
+                  <div
+                    className={
+                      errMsgStatus !== "" &&
+                      errMsgStatus !== false &&
+                      errMsgStatus !== undefined
+                        ? "col-md-6 error-select error"
+                        : "col-md-6"
+                    }
+                  >
+                    <div className="form-floating form-floating-outline custm-select-box">
+                      <Select
+                        value={fields.company_status}
+                        onChange={this.handleSelectChange.bind(
+                          this,
+                          "company_status"
+                        )}
+                        placeholder="Select Status"
+                        options={[
+                          { value: "A", label: "Active" },
+                          { value: "I", label: "Inactive" },
+                        ]}
+                      />
+                      <label className="select-box-label">
+                        Status<span className="error">*</span>
+                      </label>
+                      {errMsgStatus}
+                    </div>
+                  </div>
+
                   <div className="col-md-6">
                     <div className="form-floating form-floating-outline mb-4">
                       <div className="mb-3">
@@ -1258,33 +1350,7 @@ class Form extends Component {
                     )}
                   </div>
 
-                  <div
-                    className={
-                      errMsgStatus !== "" &&
-                      errMsgStatus !== false &&
-                      errMsgStatus !== undefined
-                        ? "col-md-6 error-select error"
-                        : "col-md-6"
-                    }
-                  >
-                    <div className="form-floating form-floating-outline custm-select-box">
-                      <Select
-                        value={fields.company_status}
-                        onChange={this.handleSelectChange.bind(this, "company_status")}
-                        placeholder="Select Status"
-                        options={[
-                          { value: "A", label: "Active" },
-                          { value: "I", label: "Inactive" },
-                        ]}
-                      />
-                      <label className="select-box-label">
-                        Status<span className="error">*</span>
-                      </label>
-                      {errMsgStatus}
-                    </div>
-                  </div>
-
-                  <div className="col-md-12" style={{display: 'none'}}>
+                  <div className="col-md-12" style={{ display: "none" }}>
                     <h1 className="display-6 mb-0">
                       Availability<span className="error">*</span>
                     </h1>
@@ -1363,7 +1429,7 @@ class Form extends Component {
                       <span>Enable Menu</span>
                     </div>
                   </div>
-                  <div className="col-md-3" style={{display: 'none'}}>
+                  <div className="col-md-3" style={{ display: "none" }}>
                     <div className="form-floating form-floating-outline mb-4">
                       <Switch
                         onChange={this.handleChange.bind(this, "enable_tat")}
@@ -1391,7 +1457,7 @@ class Form extends Component {
                       <span>Enable Zone Option</span>
                     </div>
                   </div>
-                  <div className="col-md-3" style={{display: 'none'}}>
+                  <div className="col-md-3" style={{ display: "none" }}>
                     <div className="form-floating form-floating-outline mb-4">
                       <Switch
                         onChange={this.handleChange.bind(
@@ -1408,7 +1474,7 @@ class Form extends Component {
                       <span>Enable Zone Order Value Base Delivery Charge</span>
                     </div>
                   </div>
-                  <div className="col-md-3" style={{display: 'none'}}>
+                  <div className="col-md-3" style={{ display: "none" }}>
                     <div className="form-floating form-floating-outline mb-4">
                       <Switch
                         onChange={this.handleChange.bind(
@@ -1442,7 +1508,7 @@ class Form extends Component {
                       <span>Enable Maintenance Mode</span>
                     </div>
                   </div>
-                  <div className="col-md-3" style={{display: 'none'}}>
+                  <div className="col-md-3" style={{ display: "none" }}>
                     <div className="form-floating form-floating-outline mb-4">
                       <Switch
                         onChange={this.handleChange.bind(
@@ -1457,6 +1523,23 @@ class Form extends Component {
                         activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
                       />
                       <span>Enable Itemwise Report</span>
+                    </div>
+                  </div>
+                  <div className="col-md-3">
+                    <div className="form-floating form-floating-outline mb-4">
+                      <Switch
+                        onChange={this.handleChange.bind(
+                          this,
+                          "enable_subscription"
+                        )}
+                        checked={fields.enable_subscription}
+                        onColor="#666cff"
+                        className="react-switch"
+                        onHandleColor="#bdbfff"
+                        boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
+                        activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
+                      />
+                      <span>Enable Subscription</span>
                     </div>
                   </div>
                 </div>
@@ -1517,7 +1600,7 @@ class Form extends Component {
                       <span>Enable Promocode</span>
                     </div>
                   </div>
-                  <div className="col-md-3" style={{display: 'none'}}>
+                  <div className="col-md-3" style={{ display: "none" }}>
                     <div className="form-floating form-floating-outline mb-4">
                       <Switch
                         onChange={this.handleChange.bind(
@@ -1539,7 +1622,7 @@ class Form extends Component {
             </div>
           </div>
 
-          <div className="accordion-item " style={{display: 'none'}}>
+          <div className="accordion-item " style={{ display: "none" }}>
             <h2 className="accordion-header">
               <button
                 type="button"
@@ -1637,7 +1720,7 @@ class Form extends Component {
             </div>
           </div>
 
-          <div className="accordion-item " style={{display: 'none'}}>
+          <div className="accordion-item " style={{ display: "none" }}>
             <h2 className="accordion-header">
               <button
                 type="button"
@@ -1983,7 +2066,7 @@ class Form extends Component {
             </div>
           </div>
 
-          <div className="accordion-item " style={{display: 'none'}}>
+          <div className="accordion-item " style={{ display: "none" }}>
             <h2 className="accordion-header">
               <button
                 type="button"

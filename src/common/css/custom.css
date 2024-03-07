@@ -132,20 +132,23 @@
 }
 .mission_type {
     padding-right: 0px;
-    width: 120px;
+    width: 200px;
 }
 .mission_nooftransaction {
     padding-left: 8px;
     padding-right: 8px;
-    width: 120px;
+    width: 160px;
 }
 .mission_bonus_points_maindiv {
     margin: 0px;
     padding: 0px;
-    width: 90px;
+    width: 160px;
 }
 .mission_bonuspoints_validity_maindiv {
     margin: 0px;
     padding: 0px;
     width: 90px;
+}
+.swal2-container {
+    z-index: 9999;
 }
